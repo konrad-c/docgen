@@ -1,3 +1,0 @@
-foobar = 123
-test = 543
-another = 1251 foobar
