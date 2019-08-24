@@ -1,14 +1,9 @@
 #[macro_use]
 extern crate lazy_static;
 
-mod name;
-mod location;
-mod primitive;
-mod util;
 mod placeholder;
-mod generator;
 
-use placeholder::{Placeholder, PlaceholderParseError};
+use placeholder::{Placeholder, PlaceholderStub, PlaceholderParseError};
 use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures};
 
@@ -61,14 +56,6 @@ Supported data types:
         })
         .expect("No template supplied");
 
-
-    // let template_file: Option<String> = matches.value_of("template-file")
-    //     .and_then(|filename| std::fs::read_to_string(filename).ok());
-    // let template_arg: Option<String> = matches.value_of("template")
-    //     .map(|t: &str| t.to_owned());
-    // let sourced_template: String = template_file.or(template_arg).unwrap();
-
-
     let repetitions: u64 = matches.value_of("number")
         .unwrap_or("1")
         .parse::<u64>()
@@ -89,8 +76,10 @@ fn populate_template(template: &str) -> String {
         let matched_text: &str = captures.get(0).unwrap().as_str();
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
 
-        let parsed_placeholder: Result<Placeholder, PlaceholderParseError> = placeholder::parse(placeholder_str);
-        let placeholder_data: Result<String, PlaceholderParseError> = parsed_placeholder.and_then(|placeholder| generator::generate_data(placeholder));
+        let placeholder_data: Result<String, PlaceholderParseError> = 
+            PlaceholderStub::parse(placeholder_str)
+                .and_then(|parsed_stub| Placeholder::from_stub(parsed_stub))
+                .map(|placeholder: Placeholder| placeholder.synth());
         match placeholder_data {
             Ok(data) => {
                 println!("Matched: {}, Generated data: {}", matched_text, data);
