@@ -48,7 +48,10 @@ Supported data types:
             .short("n")
             .takes_value(true)
             .default_value("1"))
+        .arg(Arg::with_name("minify-output")
+            .help("Flag to remove any "))
         .get_matches();
+    
     let template: String = matches.value_of("template-file")
         .and_then(|filename| std::fs::read_to_string(filename).ok())
         .or({
@@ -61,9 +64,8 @@ Supported data types:
         .parse::<u64>()
         .unwrap_or(1);
     
-    for i in 0..repetitions {
+    for _ in 0..repetitions {
         let generated_doc: String = populate_template(&template);
-        println!("Populating document #{}", i);
         println!("{}", generated_doc);
     }
 
@@ -71,7 +73,7 @@ Supported data types:
 }
 
 fn populate_template(template: &str) -> String {
-    let placeholder_regex: Regex = Regex::new(r"\$\{(?P<placeholder>.*)\}").unwrap();
+    let placeholder_regex: Regex = Regex::new(r"\$\{(?P<placeholder>[^\}]*)\}").unwrap();
     let populated_template = placeholder_regex.replace_all(template, |captures: &Captures| {
         let matched_text: &str = captures.get(0).unwrap().as_str();
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
@@ -81,10 +83,7 @@ fn populate_template(template: &str) -> String {
                 .and_then(|parsed_stub| Placeholder::from_stub(parsed_stub))
                 .map(|placeholder: Placeholder| placeholder.synth());
         match placeholder_data {
-            Ok(data) => {
-                println!("Matched: {}, Generated data: {}", matched_text, data);
-                return data;
-            },
+            Ok(data) => data,
             Err(parse_error) => {
                 println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
                 return format!("{}", matched_text);
