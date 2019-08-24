@@ -104,10 +104,10 @@ impl Placeholder {
 
     pub fn synth(&self) -> String {
         match *self {
-            Placeholder::FirstName => name::first(),
-            Placeholder::LastName => name::last(),
+            Placeholder::FirstName => name::first().to_owned(),
+            Placeholder::LastName => name::last().to_owned(),
             Placeholder::FullName => name::full(),
-            Placeholder::Place => location::place(),
+            Placeholder::Place => location::place().to_owned(),
             Placeholder::Float { rounding } => primitive::float(rounding).to_string(),
             Placeholder::Int { min, max }  => primitive::int(min, max).to_string(),
             Placeholder::Address => location::address(),

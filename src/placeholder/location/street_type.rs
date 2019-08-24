@@ -1,0 +1,1 @@
+pub const STREET_TYPE: [&'static str; 11] = ["Ave","Dr","Ct","Cres","Gr","Hwy","Lane","Pde","Pl","Rd","St"];

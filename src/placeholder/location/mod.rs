@@ -1,19 +1,26 @@
-mod places;
-mod streets;
+mod place;
+mod street;
+mod street_type;
 
-use places::PLACES;
-use streets::STREETS;
+use place::PLACE;
+use street::STREET;
+use street_type::STREET_TYPE;
 use super::util;
 use super::primitive;
 
-pub fn place() -> String {
-    let index: usize = util::rand_index(PLACES.len());
-    return PLACES[index].to_owned();
+pub fn place() -> &'static str {
+    let index: usize = util::rand_index(PLACE.len());
+    return PLACE[index];
 }
 
-pub fn street() -> String {
-    let index: usize = util::rand_index(STREETS.len());
-    return STREETS[index].to_owned();
+pub fn street() -> &'static str {
+    let index: usize = util::rand_index(STREET.len());
+    return STREET[index];
+}
+
+pub fn street_type() -> &'static str {
+    let index: usize = util::rand_index(STREET_TYPE.len());
+    return STREET_TYPE[index];
 }
 
 fn unit_number() -> String {
@@ -29,5 +36,5 @@ pub fn address() -> String {
         true => format!("{}/{}", unit_number(), house_number()),
         false => format!("{}", house_number())
     };
-    format!("{} {}, {}", house_num, street(), place())
+    format!("{} {} {}, {}", house_num, street(), street_type(), place())
 }
