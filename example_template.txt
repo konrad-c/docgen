@@ -1,1 +1,6 @@
-template-file: ${fullName}, at ${int} ${place}
+{
+    "fullName": "${fullName}",
+    "int": ${int},
+    "place": "${place}",
+    "float": ${float}
+}

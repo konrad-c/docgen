@@ -1,8 +1,15 @@
+#[macro_use]
+extern crate lazy_static;
+
 mod name;
 mod location;
 mod primitive;
 mod util;
+mod parser;
+
+use parser::{Field, FieldParseError};
 use clap::{App, Arg};
+use regex::{Regex, Captures};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("Templated data generator tool")
@@ -45,7 +52,30 @@ Supported data types:
     let template_arg: Option<String> = matches.value_of("template")
         .map(|template_string| template_string.to_owned());
 
-    let populated_template: Option<String> = template_from_file.or(template_arg)
+    let template_string: String = template_from_file.or(template_arg).unwrap_or(String::from(""));
+
+    let field_regex: Regex = Regex::new(r"\$\{(?P<field>.*)\}").unwrap();
+    let regexed_template = field_regex.replace_all(&template_string, |captures: &Captures| {
+        let matched_text: &str = captures.get(0).unwrap().as_str();
+        let field_str: &str = captures.name("field").unwrap().as_str();
+        let parsed_field: Result<Field, FieldParseError> = parser::parse_field(field_str);
+        match parsed_field {
+            Ok(field) => println!("Matched: {}, field_type: {}, args: {:?}", matched_text, field.field_type, field.args),
+            Err(parse_error) => println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason)
+        }
+        
+        let field_generator: Result<String, parser::FieldParseError> = Ok(String::from("populated_field"));
+
+        return match field_generator {
+            Ok(result) => format!("{}", result),
+            Err(parse_error) => {
+                println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
+                return format!("{}", matched_text);
+            }
+        }
+    });
+
+    let _populated_template: Option<String> = Some(template_string.clone())
         .map(|t| t.replace("${float}", &primitive::float(None).to_string() ))
         .map(|t| t.replace("${int}", &primitive::int(-10, 10).to_string() ))
         .map(|t| t.replace("${string}", &primitive::string(10)))
@@ -54,17 +84,7 @@ Supported data types:
         .map(|t| t.replace("${fullName}", &name::full() ))
         .map(|t| t.replace("${place}", &location::place() ));
     
-    match populated_template {
-        Some(value) => println!("{}", value),
-        None => println!("No template supplied")
-    }
+    println!("{}", regexed_template);
 
     Ok(())
-}
-
-fn test_generative_fn<F>(fn_name: &str, number:usize, f: F) where F: Fn() -> String {
-    for _ in 1..number {
-        let val: String = f();
-        println!("{}: {:?}", fn_name, val);
-    }
 }
