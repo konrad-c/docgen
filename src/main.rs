@@ -9,11 +9,11 @@ mod placeholder;
 mod generator;
 
 use placeholder::{Placeholder, PlaceholderParseError};
-use clap::{App, Arg};
+use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let matches = App::new("Templated data generator tool")
+    let matches: ArgMatches = App::new("Templated data generator tool")
         .version("0.0.1")
         .author("Konrad <ko.cybulski@gmail.com>")
         .about("A tool for generating randomised documents in any form provided a template.
@@ -48,17 +48,44 @@ Supported data types:
             .long("template-file")
             .takes_value(true)
             .required_unless("template"))
+        .arg(Arg::with_name("number")
+            .help("Number of populated documents to generate according to the template")
+            .short("n")
+            .takes_value(true)
+            .default_value("1"))
         .get_matches();
+    let template: String = matches.value_of("template-file")
+        .and_then(|filename| std::fs::read_to_string(filename).ok())
+        .or({
+            matches.value_of("template").map(|t: &str| t.to_owned())
+        })
+        .expect("No template supplied");
 
-    let template_from_file: Option<String> = matches.value_of("template-file")
-        .map(|filename| std::fs::read_to_string(filename).unwrap());
-    let template_arg: Option<String> = matches.value_of("template")
-        .map(|template_string| template_string.to_owned());
 
-    let template_string: String = template_from_file.or(template_arg).unwrap_or(String::from(""));
+    // let template_file: Option<String> = matches.value_of("template-file")
+    //     .and_then(|filename| std::fs::read_to_string(filename).ok());
+    // let template_arg: Option<String> = matches.value_of("template")
+    //     .map(|t: &str| t.to_owned());
+    // let sourced_template: String = template_file.or(template_arg).unwrap();
 
+
+    let repetitions: u64 = matches.value_of("number")
+        .unwrap_or("1")
+        .parse::<u64>()
+        .unwrap_or(1);
+    
+    for i in 0..repetitions {
+        let generated_doc: String = populate_template(&template);
+        println!("Populating document #{}", i);
+        println!("{}", generated_doc);
+    }
+
+    Ok(())
+}
+
+fn populate_template(template: &str) -> String {
     let placeholder_regex: Regex = Regex::new(r"\$\{(?P<placeholder>.*)\}").unwrap();
-    let regexed_template = placeholder_regex.replace_all(&template_string, |captures: &Captures| {
+    let populated_template = placeholder_regex.replace_all(template, |captures: &Captures| {
         let matched_text: &str = captures.get(0).unwrap().as_str();
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
 
@@ -75,17 +102,5 @@ Supported data types:
             }
         }
     });
-
-    let _populated_template: Option<String> = Some(template_string.clone())
-        .map(|t| t.replace("${float}", &primitive::float(None).to_string() ))
-        .map(|t| t.replace("${int}", &primitive::int(-10, 10).to_string() ))
-        .map(|t| t.replace("${string}", &primitive::string(10)))
-        .map(|t| t.replace("${firstName}", &name::first() ))
-        .map(|t| t.replace("${lastName}", &name::last() ))
-        .map(|t| t.replace("${fullName}", &name::full() ))
-        .map(|t| t.replace("${place}", &location::place() ));
-    
-    println!("{}", regexed_template);
-
-    Ok(())
+    format!("{}", populated_template)
 }

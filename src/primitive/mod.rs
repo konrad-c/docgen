@@ -1,4 +1,4 @@
-pub fn string(length: usize) -> String {
+pub fn _string(length: usize) -> String {
     use rand::{Rng, thread_rng};
     use rand::distributions::Alphanumeric;
     
