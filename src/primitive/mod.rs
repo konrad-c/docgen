@@ -17,7 +17,7 @@ pub fn float(rounding: Option<i8>) -> f64 {
     }
 }
 
-pub fn int(min: i64, max: i64) -> i64{
+pub fn int(min: i64, max: i64) -> i64 {
     let range: i64 = max - min;
     let rand_in_range: f64 = (range as f64) * rand::random::<f64>();
     return min + rand_in_range as i64;

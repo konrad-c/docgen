@@ -1,6 +1,10 @@
 {
-    "fullName": "${fullName}",
     "int": ${int},
-    "place": "${place}",
-    "float": ${float}
+    "int_min_max": ${int:-400,90000},
+    "float": ${float},
+    "float_rounded": ${float:3},
+    "fullName": "${fullName}",
+    "firstName": "${firstName}",
+    "lastName": "${lastName}",
+    "place": "${place}"
 }

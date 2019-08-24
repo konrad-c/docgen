@@ -5,9 +5,10 @@ mod name;
 mod location;
 mod primitive;
 mod util;
-mod parser;
+mod placeholder;
+mod generator;
 
-use parser::{Field, FieldParseError};
+use placeholder::{Placeholder, PlaceholderParseError};
 use clap::{App, Arg};
 use regex::{Regex, Captures};
 
@@ -16,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .version("0.0.1")
         .author("Konrad <ko.cybulski@gmail.com>")
         .about("A tool for generating randomised documents in any form provided a template.
-Provide a template string or file containing typed fields for which this tool will generate data, and create a document according to the tempalte with those fields replaced with randomised data.
+Provide a template string or file containing typed placeholders for which this tool will generate data, and create a document according to the tempalte with those placeholders replaced with randomised data.
 
 Example templates:
     'Hi, my name is ${firstName} ${lastName}'
@@ -30,8 +31,10 @@ Supported data types:
     - phoneNumber
     - address
     - guid
-    - integer
+    - int (integer between 0 and 10)
+    - int:MIN,MAX (integer between MIN and MAX values)
     - float (values default between 0 and 1)
+    - float:ROUNDING (number of decimal places to round float value)
         ")
         .arg(Arg::with_name("template")
             .help("The template string to populate with generated data")
@@ -54,20 +57,18 @@ Supported data types:
 
     let template_string: String = template_from_file.or(template_arg).unwrap_or(String::from(""));
 
-    let field_regex: Regex = Regex::new(r"\$\{(?P<field>.*)\}").unwrap();
-    let regexed_template = field_regex.replace_all(&template_string, |captures: &Captures| {
+    let placeholder_regex: Regex = Regex::new(r"\$\{(?P<placeholder>.*)\}").unwrap();
+    let regexed_template = placeholder_regex.replace_all(&template_string, |captures: &Captures| {
         let matched_text: &str = captures.get(0).unwrap().as_str();
-        let field_str: &str = captures.name("field").unwrap().as_str();
-        let parsed_field: Result<Field, FieldParseError> = parser::parse_field(field_str);
-        match parsed_field {
-            Ok(field) => println!("Matched: {}, field_type: {}, args: {:?}", matched_text, field.field_type, field.args),
-            Err(parse_error) => println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason)
-        }
-        
-        let field_generator: Result<String, parser::FieldParseError> = Ok(String::from("populated_field"));
+        let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
 
-        return match field_generator {
-            Ok(result) => format!("{}", result),
+        let parsed_placeholder: Result<Placeholder, PlaceholderParseError> = placeholder::parse(placeholder_str);
+        let placeholder_data: Result<String, PlaceholderParseError> = parsed_placeholder.and_then(|placeholder| generator::generate_data(placeholder));
+        match placeholder_data {
+            Ok(data) => {
+                println!("Matched: {}, Generated data: {}", matched_text, data);
+                return data;
+            },
             Err(parse_error) => {
                 println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
                 return format!("{}", matched_text);
