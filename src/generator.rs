@@ -2,6 +2,7 @@ use super::location;
 use super::primitive;
 use super::name;
 use super::placeholder::{Placeholder, PlaceholderParseError};
+use uuid::Uuid;
 
 pub fn generate_data(placeholder: Placeholder) -> Result<String, PlaceholderParseError> {
     match placeholder  {
@@ -11,6 +12,7 @@ pub fn generate_data(placeholder: Placeholder) -> Result<String, PlaceholderPars
         Placeholder::Place => Ok(location::place()),
         Placeholder::Float { rounding } => Ok(primitive::float(rounding).to_string()),
         Placeholder::Int { min, max }  => Ok(primitive::int(min, max).to_string()),
-        _ => panic!("Data generation not supported for placeholder type: {:?}", placeholder)
+        Placeholder::Address => Ok(location::address()),
+        Placeholder::Guid => Ok(Uuid::new_v4().to_hyphenated().to_string())
     }
 }

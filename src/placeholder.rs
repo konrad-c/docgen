@@ -25,7 +25,9 @@ pub enum Placeholder {
     FullName,
     Place,
     Float { rounding: Option<i8> },
-    Int { min: i64, max: i64 }
+    Int { min: i64, max: i64 },
+    Address,
+    Guid
 }
 
 impl Placeholder {
@@ -46,6 +48,8 @@ impl Placeholder {
             ("lastName", []) => Ok(Placeholder::LastName),
             ("fullName", []) => Ok(Placeholder::FullName),
             ("place", []) => Ok(Placeholder::Place),
+            ("address", []) => Ok(Placeholder::Address),
+            ("guid", []) => Ok(Placeholder::Guid),
             (unrecognised_token, _) => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
         }
     }
@@ -99,7 +103,7 @@ fn parse_stub<'t>(placeholder: &'t str) -> Result<PlaceholderStub, PlaceholderPa
 }
 
 #[cfg(test)]
-mod tests {
+mod placeholder_tests {
     use super::*;
 
     #[test]

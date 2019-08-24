@@ -6,5 +6,7 @@
     "fullName": "${fullName}",
     "firstName": "${firstName}",
     "lastName": "${lastName}",
-    "place": "${place}"
+    "place": "${place}",
+    "address": "${address}",
+    "guid": "${guid}"
 }
