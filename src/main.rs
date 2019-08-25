@@ -15,21 +15,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Provide a template string or file containing typed placeholders for which this tool will generate data, and create a document according to the tempalte with those placeholders replaced with randomised data.
 
 Example templates:
-    'Hi, my name is ${firstName} ${lastName}'
-    'Hi, my name is ${fullName}'
-    '{\"id\": \"${guid}\", \"phone\": \"${phoneNumber}\"}'
+    'Hi, my name is ${first_name} ${last_name}'
+    'Hi, my name is ${full_name}'
+    '{\"id\": \"${guid}\", \"phone\": \"${phone}\"}'
 
 Supported data types:
-    - firstName
-    - lastName
-    - fullName
-    - phoneNumber
+    Complex types:
+    - first_name
+    - last_name
+    - full_name
     - address
-    - guid
+    - phone
+    - place
+
+    Primitive types:
     - int (integer between 0 and 10)
     - int:MIN,MAX (integer between MIN and MAX values)
     - float (values default between 0 and 1)
     - float:ROUNDING (number of decimal places to round float value)
+    - guid
         ")
         .arg(Arg::with_name("template")
             .help("The template string to populate with generated data")
@@ -48,8 +52,6 @@ Supported data types:
             .short("n")
             .takes_value(true)
             .default_value("1"))
-        .arg(Arg::with_name("minify-output")
-            .help("Flag to remove any "))
         .get_matches();
     
     let template: String = matches.value_of("template-file")

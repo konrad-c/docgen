@@ -1,5 +1,5 @@
 [package]
-name = "data-gen"
+name = "docgen"
 version = "0.1.0"
 authors = ["konrad-c <ko.cybulski@gmail.com>"]
 edition = "2018"

@@ -1,1 +1,0 @@
-{"int": ${int},"int_min_max": ${int:-400,90000},"float": ${float},"float_rounded": ${float:3},"fullName": "${fullName}","firstName": "${firstName}","lastName": "${lastName}","place": "${place}","address": "${address}","guid": "${guid}"}
