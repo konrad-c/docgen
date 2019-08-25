@@ -9,5 +9,5 @@
     "place": "${place}",
     "address": "${address}",
     "guid": "${guid}",
-    "phone_number": "${phone_number}"
+    "phone": "${phone}"
 }

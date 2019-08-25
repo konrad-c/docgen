@@ -55,3 +55,10 @@ Primitive types:
 - float (values default between 0 and 1)
 - float:ROUNDING (number of decimal places to round float value)
 - guid
+
+## TODO
+- [x] Phone number
+    - [x] Mobile
+    - [x] Landline
+    - [x] Country codes
+- [] Random selection of supplied strings e.g. ${select:A,B,C}

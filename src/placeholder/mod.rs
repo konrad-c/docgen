@@ -2,6 +2,7 @@ mod location;
 mod primitive;
 mod name;
 mod util;
+mod phone;
 
 use regex::{Regex, Captures, Match};
 use uuid::Uuid;
@@ -71,10 +72,11 @@ pub enum Placeholder {
     FirstName,
     LastName,
     FullName,
+    Phone,
+    Address,
     Place,
     Float { rounding: Option<i8> },
     Int { min: i64, max: i64 },
-    Address,
     Guid
 }
 
@@ -97,6 +99,7 @@ impl Placeholder {
             ("full_name", []) => Ok(Placeholder::FullName),
             ("place", []) => Ok(Placeholder::Place),
             ("address", []) => Ok(Placeholder::Address),
+            ("phone", []) => Ok(Placeholder::Phone),
             ("guid", []) => Ok(Placeholder::Guid),
             (unrecognised_token, _) => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
         }
@@ -111,6 +114,7 @@ impl Placeholder {
             Placeholder::Float { rounding } => primitive::float(rounding).to_string(),
             Placeholder::Int { min, max }  => primitive::int(min, max).to_string(),
             Placeholder::Address => location::address(),
+            Placeholder::Phone => phone::phone(),
             Placeholder::Guid => Uuid::new_v4().to_hyphenated().to_string()
         }
     }
