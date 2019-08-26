@@ -77,7 +77,8 @@ pub enum Placeholder {
     Place,
     Float { rounding: Option<i8> },
     Int { min: i64, max: i64 },
-    Guid
+    Guid,
+    Set { options: Vec<String> }
 }
 
 impl Placeholder {
@@ -101,21 +102,23 @@ impl Placeholder {
             ("address", []) => Ok(Placeholder::Address),
             ("phone", []) => Ok(Placeholder::Phone),
             ("guid", []) => Ok(Placeholder::Guid),
+            ("set", options) => Ok(Placeholder::Set { options: options.to_vec() }),
             (unrecognised_token, _) => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
         }
     }
 
     pub fn synth(&self) -> String {
-        match *self {
+        match self {
             Placeholder::FirstName => name::first().to_owned(),
             Placeholder::LastName => name::last().to_owned(),
             Placeholder::FullName => name::full(),
             Placeholder::Place => location::place().to_owned(),
-            Placeholder::Float { rounding } => primitive::float(rounding).to_string(),
-            Placeholder::Int { min, max }  => primitive::int(min, max).to_string(),
+            Placeholder::Float { rounding } => primitive::float(*rounding).to_string(),
+            Placeholder::Int { min, max }  => primitive::int(*min, *max).to_string(),
             Placeholder::Address => location::address(),
             Placeholder::Phone => phone::phone(),
-            Placeholder::Guid => Uuid::new_v4().to_hyphenated().to_string()
+            Placeholder::Guid => Uuid::new_v4().to_hyphenated().to_string(),
+            Placeholder::Set { options } => util::from_set(options)
         }
     }
 }

@@ -9,5 +9,7 @@
     "place": "${place}",
     "address": "${address}",
     "guid": "${guid}",
-    "phone": "${phone}"
+    "phone": "${phone}",
+    "set": "${set:First,Second,Third}"
+    "set_with_spaces": "${set:first one,then second,finally third}"
 }

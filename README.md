@@ -61,4 +61,5 @@ Primitive types:
     - [x] Mobile
     - [x] Landline
     - [x] Country codes
-- [] Random selection of supplied strings e.g. ${select:A,B,C}
+- [x] Random selection of supplied strings e.g. ${select:A,B,C}
+- [] Option to relate first name and last name to the full name generated
