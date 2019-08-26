@@ -2,8 +2,10 @@
 extern crate lazy_static;
 
 mod placeholder;
+mod generator;
 
-use placeholder::{Placeholder, PlaceholderStub, PlaceholderParseError};
+use placeholder::Placeholder;
+use placeholder::error::PlaceholderParseError;
 use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures};
 
@@ -80,10 +82,8 @@ fn populate_template(template: &str) -> String {
         let matched_text: &str = captures.get(0).unwrap().as_str();
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
 
-        let placeholder_data: Result<String, PlaceholderParseError> = 
-            PlaceholderStub::parse(placeholder_str)
-                .and_then(|parsed_stub| Placeholder::from_stub(parsed_stub))
-                .map(|placeholder: Placeholder| placeholder.synth());
+        let placeholder_data: Result<String, PlaceholderParseError> = Placeholder::parse(placeholder_str)
+                .map(|placeholder: Placeholder| generator::synth(placeholder));
         match placeholder_data {
             Ok(data) => data,
             Err(parse_error) => {
