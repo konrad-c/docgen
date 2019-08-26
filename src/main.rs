@@ -83,7 +83,7 @@ fn populate_template(template: &str) -> String {
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
 
         let placeholder_data: Result<String, PlaceholderParseError> = Placeholder::parse(placeholder_str)
-                .map(|placeholder: Placeholder| generator::synth(placeholder));
+            .map(|placeholder: Placeholder| generator::synth(placeholder));
         match placeholder_data {
             Ok(data) => data,
             Err(parse_error) => {

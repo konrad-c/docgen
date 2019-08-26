@@ -63,3 +63,6 @@ Primitive types:
     - [x] Country codes
 - [x] Random selection of supplied strings e.g. ${select:A,B,C}
 - [] Option to relate first name and last name to the full name generated
+    - [] Related placeholders by identifier e.g. `${<id>full_name} ${<id>first_name}`
+    - [] Each entity with an ID contains fields for each placeholder type that is lazy loaded as required and as each placeholder is populated. Placeholders are populated by reaching into the desired entity and getting the field for that type of exists, otherwise it is generated
+- [] Hierarchical placeholders split by `::` e.g. `${phone::mobile}`
