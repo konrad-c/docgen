@@ -2,12 +2,15 @@
 extern crate lazy_static;
 
 mod placeholder;
-mod generator;
 
+// use placeholder::Placeholder;
 use placeholder::Placeholder;
+use placeholder::collection::PlaceholderCollection;
+use placeholder::generator;
 use placeholder::error::PlaceholderParseError;
 use clap::{App, Arg, ArgMatches};
-use regex::{Regex, Captures};
+use regex::{Regex, Captures, Match};
+use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches: ArgMatches = App::new("Templated data generator tool")
@@ -76,21 +79,61 @@ Supported data types:
     Ok(())
 }
 
-fn populate_template(template: &str) -> String {
-    let placeholder_regex: Regex = Regex::new(r"\$\{(?P<placeholder>[^\}]*)\}").unwrap();
-    let populated_template = placeholder_regex.replace_all(template, |captures: &Captures| {
-        let matched_text: &str = captures.get(0).unwrap().as_str();
-        let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
+lazy_static! {
+    static ref PLACEHOLDER_REGEX: Regex = Regex::new(r"\$\{(?:<(?P<entity_id>[a-zA-Z0-9]+)>)?(?P<placeholder>[^\}]*)\}").unwrap();
+}
 
-        let placeholder_data: Result<String, PlaceholderParseError> = Placeholder::parse(placeholder_str)
-            .map(|placeholder: Placeholder| generator::synth(placeholder));
+fn populate_template(template: &str) -> String {
+    let placeholders: &mut PlaceholderCollection = &mut PlaceholderCollection { data: &mut HashMap::new() }; //PlaceholderCollection::new();
+
+    let populated_template = PLACEHOLDER_REGEX.replace_all(template, |captures: &Captures| {
+        let matched_text: String = captures.get(0).unwrap().as_str().to_owned(); 
+
+        let entity_id: Option<String> = captures.name("entity_id")
+            .map(|id: Match| id.as_str().to_owned());
+
+        let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
+        let placeholder_data: Result<Placeholder, PlaceholderParseError> = Placeholder::parse(placeholder_str);
+
         match placeholder_data {
-            Ok(data) => data,
+            Ok(placeholder) => placeholders.get(entity_id, placeholder).clone(),
             Err(parse_error) => {
                 println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
                 return format!("{}", matched_text);
             }
         }
+
+        // match placeholder_data {
+        //     Ok(data) => data,
+        //     Err(parse_error) => {
+        //         println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
+        //         return format!("{}", matched_text);
+        //     }
+        // }
     });
     format!("{}", populated_template)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use regex::Match;
+
+    #[test]
+    fn placeholder_regex_with_entity_id () {
+        let caps: Captures = PLACEHOLDER_REGEX.captures("${<id>test}").unwrap();
+        let entity_id: &str = caps.name("entity_id").unwrap().as_str();
+        let placeholder: &str = caps.name("placeholder").unwrap().as_str();
+        assert_eq!("id", entity_id);
+        assert_eq!("test", placeholder);
+    }
+
+    #[test]
+    fn placeholder_regex_without_entity_id () {
+        let caps: Captures = PLACEHOLDER_REGEX.captures("${test}").unwrap();
+        let entity_id: Option<Match> = caps.name("entity_id");
+        let placeholder: &str = caps.name("placeholder").unwrap().as_str();
+        assert_eq!(true, entity_id.is_none());
+        assert_eq!("test", placeholder);
+    }
 }
