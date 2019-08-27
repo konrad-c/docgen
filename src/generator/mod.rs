@@ -5,7 +5,7 @@ mod util;
 mod phone;
 
 use uuid::Uuid;
-use super::placeholder::{Placeholder};
+use super::placeholder::{Placeholder, PhoneType};
 
 pub fn synth(placeholder: Placeholder) -> String {
     match placeholder {
@@ -16,7 +16,11 @@ pub fn synth(placeholder: Placeholder) -> String {
         Placeholder::Float { rounding } => primitive::float(rounding).to_string(),
         Placeholder::Int { min, max }  => primitive::int(min, max).to_string(),
         Placeholder::Address => location::address(),
-        Placeholder::Phone => phone::phone(),
+        Placeholder::Phone { phone_type } => match phone_type {
+            Some(PhoneType::Mobile) => phone::mobile(true),
+            Some(PhoneType::Landline) => phone::landline(true),
+            None => phone::phone()
+        },
         Placeholder::Guid => Uuid::new_v4().to_hyphenated().to_string(),
         Placeholder::Set { options } => util::from_set(&options)
     }

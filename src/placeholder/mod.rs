@@ -1,15 +1,21 @@
-mod stub;
 pub mod error;
+mod stub;
 
-use stub::PlaceholderStub;
 use error::PlaceholderParseError;
+use stub::PlaceholderStub;
+
+#[derive(Debug)]
+pub enum PhoneType {
+    Mobile,
+    Landline
+}
 
 #[derive(Debug)]
 pub enum Placeholder {
     FirstName,
     LastName,
     FullName,
-    Phone,
+    Phone { phone_type: Option<PhoneType> },
     Address,
     Place,
     Float { rounding: Option<i8> },
@@ -33,10 +39,22 @@ impl Placeholder {
             "full_name" => Ok(Placeholder::FullName),
             "place" => Ok(Placeholder::Place),
             "address" => Ok(Placeholder::Address),
-            "phone" => Ok(Placeholder::Phone),
+            "phone" => Placeholder::phone(stub),
             "guid" => Ok(Placeholder::Guid),
             "set" => Placeholder::set(stub),
             unrecognised_token => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
+        }
+    }
+
+    fn phone(stub: PlaceholderStub) -> Result<Placeholder, PlaceholderParseError> {
+        let subtypes: Vec<&str> = stub.sub_types.iter()
+            .map(|subtype: &String| subtype.as_str())
+            .collect();
+        match subtypes[..] {
+            ["mobile"] => Ok(Placeholder::Phone { phone_type: Some(PhoneType::Mobile) }),
+            ["landline"] => Ok(Placeholder::Phone { phone_type: Some(PhoneType::Landline) }),
+            [] => Ok(Placeholder::Phone { phone_type: None }),
+            _ => Err(PlaceholderParseError { token: stub.to_string(), reason: format!("'phone' placeholder requires at least one option. {:?}, args: {:?}", subtypes, stub.args) } )
         }
     }
 
