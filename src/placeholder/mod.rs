@@ -34,14 +34,14 @@ impl Placeholder {
         match stub.data_type.as_str() {
             "float" => Placeholder::float(stub),
             "int" => Placeholder::int(stub),
+            "phone" => Placeholder::phone(stub),
+            "set" => Placeholder::set(stub),
             "first_name" => Ok(Placeholder::FirstName),
             "last_name" => Ok(Placeholder::LastName),
             "full_name" => Ok(Placeholder::FullName),
             "place" => Ok(Placeholder::Place),
             "address" => Ok(Placeholder::Address),
-            "phone" => Placeholder::phone(stub),
             "guid" => Ok(Placeholder::Guid),
-            "set" => Placeholder::set(stub),
             unrecognised_token => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
         }
     }
