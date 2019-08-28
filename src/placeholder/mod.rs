@@ -1,51 +1,92 @@
 pub mod error;
-mod stub;
-pub mod collection;
-pub mod generator;
 
 use error::PlaceholderParseError;
-use stub::PlaceholderStub;
+use regex::{Regex, Captures, Match};
 
-#[derive(Debug, Hash, Eq, PartialEq)]
-pub enum PhoneType {
-    Mobile,
-    Landline
+lazy_static! {
+    pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?:<(?P<id>[a-zA-Z0-9]+)>)?(?P<data_type>[a-zA-Z0-9_:]+)(?P<args>:[^:]*)?$").unwrap();
 }
 
-#[derive(Copy,Clone,Debug,Eq,Hash,PartialEq)]
-pub enum Placeholder {
-    FirstName,
-    LastName,
-    FullName,
-    Phone,
-    Address,
-    Place,
-    Float,
-    Int,
-    Guid,
-    Set
+#[derive(Clone,Debug,Hash,Eq,PartialEq)]
+pub struct Placeholder {
+    pub id: Option<String>,
+    pub data_type: String,
+    pub args: Option<String>
 }
-
 
 impl Placeholder {
     pub fn parse<'t>(placeholder: &'t str) -> Result<Placeholder, PlaceholderParseError> {
-        PlaceholderStub::parse(placeholder)
-            .and_then(|parsed_stub: PlaceholderStub| Placeholder::from_stub(parsed_stub))
+        let capture_groups: Result<Captures, PlaceholderParseError> = match PLACEHOLDER_REGEX.captures(placeholder) {
+            Some(captures) => Ok(captures),
+            None => Err(PlaceholderParseError::invalid_placeholder(placeholder))
+        };
+        capture_groups.map(|captures: Captures| {
+            let id: Option<String> = Placeholder::get_id(&captures);
+            let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
+            let arguments: Option<String> = Placeholder::get_args(&captures);
+            Placeholder { id: id, data_type: data_type, args: arguments }
+        })
     }
 
-    fn from_stub(stub: PlaceholderStub) -> Result<Placeholder, PlaceholderParseError> {
-        match stub.data_type.as_str() {
-            "float" => Ok(Placeholder::Float),
-            "int" => Ok(Placeholder::Int),
-            "phone" => Ok(Placeholder::Phone),
-            "set" => Ok(Placeholder::Set),
-            "first_name" => Ok(Placeholder::FirstName),
-            "last_name" => Ok(Placeholder::LastName),
-            "full_name" => Ok(Placeholder::FullName),
-            "place" => Ok(Placeholder::Place),
-            "address" => Ok(Placeholder::Address),
-            "guid" => Ok(Placeholder::Guid),
-            unrecognised_token => Err(PlaceholderParseError { token: unrecognised_token.to_owned(), reason: String::from("Unrecognised token.") } )
+    fn get_id(captures: &Captures) -> Option<String> {
+        captures.name("id")
+            .map(|id: Match| id.as_str().to_owned())
+    }
+
+    fn get_args(captures: &Captures) -> Option<String> {
+        captures.name("args")
+            .map(|args: Match| args.as_str())
+            .map(|args: &str| args.trim_start_matches(":"))
+            .map(|args: &str| args.to_owned())
+    }
+}
+
+
+#[cfg(test)]
+mod placeholder_stub_tests {
+    use super::*;
+
+    #[test]
+    fn parse_placeholder_stub_without_args() {
+        match Placeholder::parse("test") {
+            Ok(placeholder) => {
+                assert_eq!(placeholder.data_type, "test");
+                assert_eq!(placeholder.args, None);
+            },
+            Err(e) => panic!(e.reason)
+        }
+    }
+    
+    #[test]
+    fn parse_placeholder_stub_with_args() {
+        match Placeholder::parse("test:1,2") {
+            Ok(placeholder) => {
+                assert_eq!(placeholder.data_type, "test");
+                assert_eq!(placeholder.args, Some(String::from("1,2")));
+            },
+            Err(e) => panic!(e.reason)
+        }
+    }
+    
+    #[test]
+    fn forgive_placeholder_stub_without_args_but_with_arg_separator() {
+        match Placeholder::parse("test:1,2") {
+            Ok(placeholder) => {
+                assert_eq!(placeholder.data_type, "test");
+                assert_eq!(placeholder.args, Some(String::from("1,2")));
+            },
+            Err(e) => panic!(e.reason)
+        }
+    }
+    
+    #[test]
+    fn placeholder_stub_with_subtypes_and_args() {
+        match Placeholder::parse("test::example:1,2") {
+            Ok(placeholder) => {
+                assert_eq!(placeholder.data_type, "test::example");
+                assert_eq!(placeholder.args, Some(String::from("1,2")));
+            },
+            Err(e) => panic!(e.reason)
         }
     }
 }

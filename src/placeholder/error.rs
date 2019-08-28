@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct PlaceholderParseError {
     pub token: String,
     pub reason: String
