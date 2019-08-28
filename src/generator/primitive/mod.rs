@@ -1,10 +1,14 @@
-use lazycell::LazyCell;
-use super::util;
-use uuid::Uuid;
-use super::args;
+mod int_args;
+mod float_args;
+mod set_args;
 
-mod int;
-use int::IntArgs;
+use super::util;
+use int_args::IntArgs;
+use float_args::FloatArgs;
+use set_args::SetArgs;
+
+use lazycell::LazyCell;
+use uuid::Uuid;
 
 #[derive(Debug,Clone)]
 pub struct Primitive {
@@ -28,8 +32,14 @@ impl Primitive {
         self.guid.borrow_with(PrimitiveGenerator::guid).to_owned()
     }
 
-    pub fn float(&self) -> f64 {
-        *self.float.borrow_with(|| PrimitiveGenerator::float(None))
+    pub fn float(&self, args_string: &Option<String>) -> f64 {
+        *self.float.borrow_with(|| {
+            let generator_args: FloatArgs = match args_string {
+                Some(args) => FloatArgs::parse(args),
+                None => FloatArgs::new()
+            };
+            PrimitiveGenerator::float(generator_args.rounding)
+        })
     }
 
     pub fn int<'t>(&self, args_string: &Option<String>) -> i64 {
@@ -42,19 +52,22 @@ impl Primitive {
         })
     }
 
-    pub fn set(&self, options: &Vec<String>) -> String {
-        self.set.borrow_with(|| PrimitiveGenerator::from_set(options)).to_owned()
+    pub fn set(&self, args_string: &Option<String>) -> String {
+        self.set.borrow_with(|| {
+            let generator_args: SetArgs = match args_string {
+                Some(args) => SetArgs::parse(args),
+                None => SetArgs::new()
+            };
+            PrimitiveGenerator::from_set(&generator_args.options)
+        }).to_owned()
     }
 }
 
 pub struct PrimitiveGenerator;
 impl PrimitiveGenerator {
-    pub fn float(rounding: Option<i8>) -> f64 {
+    pub fn float(rounding: i8) -> f64 {
         let number: f64 = rand::random::<f64>();
-        match rounding {
-            Some(decimal_places) => math::round::floor(number, decimal_places),
-            None => number
-        }
+        math::round::floor(number, rounding)
     }
 
     pub fn guid() -> String {
@@ -67,7 +80,7 @@ impl PrimitiveGenerator {
         return min + rand_in_range as i64;
     }
 
-    pub fn from_set(set: &Vec<String>) -> String {
+    pub fn from_set<'t>(set: &Vec<&'t str>) -> String {
         let index: usize = util::rand_index(set.len());
         return set[index].to_string();
     }

@@ -23,6 +23,7 @@ impl Entity {
     }
 
     pub fn value_of(&mut self, placeholder: Placeholder) -> String {
+        println!("{}, {:?}", placeholder.data_type, placeholder.args);
         match placeholder.data_type.as_str() {
             "name::first" => self.name.first(),
             "name::last" => self.name.last(),
@@ -32,10 +33,10 @@ impl Entity {
             "phone::landline" => self.phone.landline(),
             "place" => self.location.place(),
             "address" => self.location.address(),
-            "float" => self.primitive.float().to_string(),
+            "float" => self.primitive.float(&placeholder.args).to_string(),
             "int"  => self.primitive.int(&placeholder.args).to_string(),
             "guid" => self.primitive.guid(),
-            "set" => self.primitive.set(&vec!["A".to_owned()]),//util::from_set(&vec![String::from("A"),String::from("B"),String::from("C")]),
+            "set" => self.primitive.set(&placeholder.args),
             _ => String::new()
         }
     }

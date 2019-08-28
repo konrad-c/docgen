@@ -4,7 +4,7 @@ use error::PlaceholderParseError;
 use regex::{Regex, Captures, Match};
 
 lazy_static! {
-    pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?P<data_type>[a-zA-Z0-9_:]+)(?P<args>:[^:]*)?$").unwrap();
+    pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?P<data_type>(?:[a-zA-Z0-9_]+(?:::)?)+)(?P<args>:[^:]*)?$").unwrap();
 }
 
 #[derive(Clone,Debug,Hash,Eq,PartialEq)]
