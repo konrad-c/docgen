@@ -84,7 +84,7 @@ lazy_static! {
 }
 
 fn populate_template(template: &str) -> String {
-    let placeholders: &mut PlaceholderCollection = &mut PlaceholderCollection { data: &mut HashMap::new() }; //PlaceholderCollection::new();
+    let placeholder_collection: &mut PlaceholderCollection = &mut PlaceholderCollection { data: &mut HashMap::new() };
 
     let populated_template = PLACEHOLDER_REGEX.replace_all(template, |captures: &Captures| {
         let matched_text: String = captures.get(0).unwrap().as_str().to_owned(); 
@@ -96,20 +96,12 @@ fn populate_template(template: &str) -> String {
         let placeholder_data: Result<Placeholder, PlaceholderParseError> = Placeholder::parse(placeholder_str);
 
         match placeholder_data {
-            Ok(placeholder) => placeholders.get(entity_id, placeholder).clone(),
+            Ok(placeholder) => placeholder_collection.get(entity_id, placeholder).clone(),
             Err(parse_error) => {
                 println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
                 return format!("{}", matched_text);
             }
         }
-
-        // match placeholder_data {
-        //     Ok(data) => data,
-        //     Err(parse_error) => {
-        //         println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
-        //         return format!("{}", matched_text);
-        //     }
-        // }
     });
     format!("{}", populated_template)
 }

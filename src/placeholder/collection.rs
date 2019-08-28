@@ -8,45 +8,41 @@ pub struct PlaceholderCollection<'t> {
 }
 
 impl<'t> PlaceholderCollection<'t> {
-    // pub fn new() -> &'static mut PlaceholderCollection<'t> {
-    //     return &mut PlaceholderCollection { data: &mut HashMap::new() };
-    // }
-
     pub fn get(&mut self, entity_id: Option<String>, placeholder: Placeholder) -> String {
         if let Some(id) = entity_id {
             let key: (String, Placeholder) = (id, placeholder);
             if !self.data.contains_key(&key) {
                 self.data.insert(key.clone(), generator::synth(placeholder));
             }
-            return self.data[&key].to_owned();//.get(&key).cloned().unwrap();
+            return self.data[&key].to_owned();
         } else {
             return generator::synth(placeholder);
         }
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn unidentified_will_generate_new_on_each_get(){
-//         let mut none_entity: Entity = Entity::new(None);
-//         for _ in 0..20 {
-//             let data_first: String = none_entity.value_of(Placeholder::FirstName);
-//             let data_second: String = none_entity.value_of(Placeholder::FirstName);
-//             assert_ne!(data_first, data_second);
-//         }
-//     }
+    #[test]
+    fn unidentified_will_generate_new_on_each_get(){
+        let mut collection: PlaceholderCollection = PlaceholderCollection { data: &mut HashMap::new() };
+        for _ in 0..20 {
+            let data_first: String = collection.get(None, Placeholder::FirstName);
+            let data_second: String = collection.get(None, Placeholder::FirstName);
+            assert_ne!(data_first, data_second);
+        }
+    }
 
-//     #[test]
-//     fn identified_will_retrieve_already_generated_data(){
-//         let entity_id: String = String::from("id");
-//         let mut entity_with_id: Entity = Entity::new(Some(entity_id));
-//         for _ in 0..20 {
-//             let data_first: String = entity_with_id.value_of(Placeholder::FirstName);
-//             let data_second: String = entity_with_id.value_of(Placeholder::FirstName);
-//             assert_eq!(data_first, data_second);
-//         }
-//     }
-// }
+    #[test]
+    fn identified_will_retrieve_already_generated_data(){
+        let entity_id: Option<String> = Some(String::from("id"));
+        let mut collection: PlaceholderCollection = PlaceholderCollection { data: &mut HashMap::new() };
+        for _ in 0..20 {
+            let data_first: String = collection.get(entity_id.clone(), Placeholder::FirstName);
+            let data_second: String = collection.get(entity_id.clone(), Placeholder::FirstName);
+            assert_eq!(data_first, data_second);
+        }
+    }
+}
