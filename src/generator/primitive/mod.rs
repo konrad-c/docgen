@@ -1,11 +1,13 @@
 use lazycell::LazyCell;
+use super::util;
 use uuid::Uuid;
 
 #[derive(Debug,Clone)]
 pub struct Primitive {
     float: LazyCell<f64>,
     int: LazyCell<i64>,
-    guid: LazyCell<String>
+    guid: LazyCell<String>,
+    set: LazyCell<String>
 }
 
 impl Primitive {
@@ -13,7 +15,8 @@ impl Primitive {
         Primitive {
             float: LazyCell::new(),
             int: LazyCell::new(),
-            guid: LazyCell::new()
+            guid: LazyCell::new(),
+            set: LazyCell::new()
         }
     }
 
@@ -27,6 +30,10 @@ impl Primitive {
 
     pub fn int(&self) -> i64 {
         *self.int.borrow_with(|| PrimitiveGenerator::int(0, 10))
+    }
+
+    pub fn set(&self, options: &Vec<String>) -> String {
+        self.set.borrow_with(|| PrimitiveGenerator::from_set(options)).to_owned()
     }
 }
 
@@ -48,6 +55,11 @@ impl PrimitiveGenerator {
         let range: i64 = max - min;
         let rand_in_range: f64 = (range as f64) * rand::random::<f64>();
         return min + rand_in_range as i64;
+    }
+
+    pub fn from_set(set: &Vec<String>) -> String {
+        let index: usize = util::rand_index(set.len());
+        return set[index].to_string();
     }
     
     fn _string(length: usize) -> String {

@@ -57,14 +57,6 @@ impl PhoneGenerator {
             false => number
         }
     }
-
-    fn phone() -> String {
-        let use_country_code: bool = rand::random();
-        match rand::random() {
-            true => PhoneGenerator::mobile(use_country_code),
-            false => PhoneGenerator::landline(use_country_code)
-        }
-    }
 }
 
 #[cfg(test)]

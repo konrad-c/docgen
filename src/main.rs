@@ -72,11 +72,14 @@ Supported data types:
         .parse::<u64>()
         .unwrap_or(1);
     
+    // let mut all_docs: String = String::with_capacity(template.len() * repetitions as usize);
     for _ in 0..repetitions {
         let generated_doc: String = populate_template(&template);
-        println!("{}", generated_doc);
+        println!("{}", &generated_doc);
+        // all_docs.push_str(&generated_doc);
+        // all_docs.push_str("\n");
     }
-
+    // println!("{}", all_docs);
     Ok(())
 }
 
