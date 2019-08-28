@@ -11,4 +11,5 @@ rand = "0.7.0"
 libmath = "0.2.1"
 regex = "1.2.1"
 lazy_static = "1.3.0"
+lazycell = "1.2.1"
 uuid = { version = "0.7.4", features = ["v4"] }

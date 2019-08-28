@@ -4,12 +4,11 @@ use error::PlaceholderParseError;
 use regex::{Regex, Captures, Match};
 
 lazy_static! {
-    pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?:<(?P<id>[a-zA-Z0-9]+)>)?(?P<data_type>[a-zA-Z0-9_:]+)(?P<args>:[^:]*)?$").unwrap();
+    pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?P<data_type>[a-zA-Z0-9_:]+)(?P<args>:[^:]*)?$").unwrap();
 }
 
 #[derive(Clone,Debug,Hash,Eq,PartialEq)]
 pub struct Placeholder {
-    pub id: Option<String>,
     pub data_type: String,
     pub args: Option<String>
 }
@@ -21,16 +20,10 @@ impl Placeholder {
             None => Err(PlaceholderParseError::invalid_placeholder(placeholder))
         };
         capture_groups.map(|captures: Captures| {
-            let id: Option<String> = Placeholder::get_id(&captures);
             let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
             let arguments: Option<String> = Placeholder::get_args(&captures);
-            Placeholder { id: id, data_type: data_type, args: arguments }
+            Placeholder { data_type: data_type, args: arguments }
         })
-    }
-
-    fn get_id(captures: &Captures) -> Option<String> {
-        captures.name("id")
-            .map(|id: Match| id.as_str().to_owned())
     }
 
     fn get_args(captures: &Captures) -> Option<String> {

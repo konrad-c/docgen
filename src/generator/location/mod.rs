@@ -6,35 +6,71 @@ use place::PLACE;
 use street::STREET;
 use street_type::STREET_TYPE;
 use super::util;
-use super::primitive;
+use super::primitive::PrimitiveGenerator;
 
-pub fn place() -> &'static str {
-    let index: usize = util::rand_index(PLACE.len());
-    return PLACE[index];
+use lazycell::LazyCell;
+
+#[derive(Debug,Clone)]
+pub struct Location {
+    street_number: LazyCell<String>,
+    street: LazyCell<String>,
+    place: LazyCell<String>
 }
 
-pub fn street() -> &'static str {
-    let index: usize = util::rand_index(STREET.len());
-    return STREET[index];
+impl Location {
+    pub fn new() -> Location {
+        Location {
+            street_number: LazyCell::new(),
+            street: LazyCell::new(),
+            place: LazyCell::new()
+        }
+    }
+
+    pub fn address(&self) -> String {
+        format!("{} {}, {}", self.street_number(), self.street(), self.place())
+    }
+
+    pub fn street_number(&self) -> String {
+        self.street_number.borrow_with(LocationGenerator::street_number).to_owned()
+    }
+
+    pub fn street(&self) -> String {
+        self.street.borrow_with(LocationGenerator::street).to_owned()
+    }
+    
+    pub fn place(&self) -> String {
+        self.place.borrow_with(LocationGenerator::place).to_owned()
+    }
 }
 
-pub fn street_type() -> &'static str {
-    let index: usize = util::rand_index(STREET_TYPE.len());
-    return STREET_TYPE[index];
-}
+struct LocationGenerator;
+impl LocationGenerator {
+    fn place() -> String {
+        let index: usize = util::rand_index(PLACE.len());
+        return PLACE[index].to_owned();
+    }
 
-fn unit_number() -> String {
-    primitive::int(1, 50).to_string()
-}
+    fn street() -> String {
+        let street_name_index: usize = util::rand_index(STREET.len());
+        let street_name = STREET[street_name_index];
 
-fn house_number() -> String {
-    primitive::int(1, 500).to_string()
-}
+        let street_type_index: usize = util::rand_index(STREET_TYPE.len());
+        let street_type = STREET_TYPE[street_type_index];
+        format!("{} {}", street_name, street_type)
+    }
 
-pub fn address() -> String {
-    let house_num: String = match rand::random() {
-        true => format!("{}/{}", unit_number(), house_number()),
-        false => format!("{}", house_number())
-    };
-    format!("{} {} {}, {}", house_num, street(), street_type(), place())
+    fn unit_number() -> String {
+        PrimitiveGenerator::int(1, 50).to_string()
+    }
+
+    fn house_number() -> String {
+        PrimitiveGenerator::int(1, 500).to_string()
+    }
+
+    fn street_number() -> String {
+        match rand::random() {
+            true => format!("{}/{}", LocationGenerator::unit_number(), LocationGenerator::house_number()),
+            false => format!("{}", LocationGenerator::house_number())
+        }
+    }
 }
