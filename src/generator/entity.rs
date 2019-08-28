@@ -33,7 +33,7 @@ impl Entity {
             "place" => self.location.place(),
             "address" => self.location.address(),
             "float" => self.primitive.float().to_string(),
-            "int"  => self.primitive.int().to_string(),
+            "int"  => self.primitive.int(&placeholder.args).to_string(),
             "guid" => self.primitive.guid(),
             "set" => self.primitive.set(&vec!["A".to_owned()]),//util::from_set(&vec![String::from("A"),String::from("B"),String::from("C")]),
             _ => String::new()

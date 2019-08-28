@@ -1,6 +1,10 @@
 use lazycell::LazyCell;
 use super::util;
 use uuid::Uuid;
+use super::args;
+
+mod int;
+use int::IntArgs;
 
 #[derive(Debug,Clone)]
 pub struct Primitive {
@@ -28,8 +32,14 @@ impl Primitive {
         *self.float.borrow_with(|| PrimitiveGenerator::float(None))
     }
 
-    pub fn int(&self) -> i64 {
-        *self.int.borrow_with(|| PrimitiveGenerator::int(0, 10))
+    pub fn int<'t>(&self, args_string: &Option<String>) -> i64 {
+        *self.int.borrow_with(|| {
+            let generator_args: IntArgs = match args_string {
+                Some(args) => IntArgs::parse(args),
+                None => IntArgs::new()
+            };
+            PrimitiveGenerator::int(generator_args.min, generator_args.max)
+        })
     }
 
     pub fn set(&self, options: &Vec<String>) -> String {

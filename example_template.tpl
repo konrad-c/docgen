@@ -1,7 +1,7 @@
 {
     "int": ${<1>int},
     "int": ${<1>int},
-    "int_min_max": ${int:-400,90000},
+    "int_min_max": ${int:-100,100},
     "float": ${float},
     "float_rounded": ${float:3},
     "name::full": "${<1>name::full}",
