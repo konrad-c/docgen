@@ -63,17 +63,7 @@ Primitive types:
     - [x] Country codes
 - [x] Random selection of supplied strings e.g. ${select:A,B,C}
 - [x] Hierarchical placeholders split by `::` e.g. `${phone::mobile}`
-- [] Option to relate first name and last name to the full name generated
-    - [] Related placeholders by identifier e.g. `${<id>full_name} ${<id>first_name}` e.g. `${<person1>full_name} ${<person1>first_name}`
-    - [] Each entity with an ID contains fields for each placeholder type that is lazy loaded as required and as each placeholder is populated.
+- [x] Option to relate first name and last name to the full name generated
+    - [x] Related placeholders by identifier e.g. `${<id>full_name} ${<id>first_name}` e.g. `${<person1>full_name} ${<person1>first_name}`
+    - [x] Each entity with an ID contains fields for each placeholder type that is lazy loaded as required and as each placeholder is populated.
     Placeholders are populated by reaching into the desired entity and getting the field for that type of exists, otherwise it is generated
-
-## Related entity plan:
-The current parsing system aims to parse an entire ${...} block into a placeholder type.
-These placeholders contain information about itself as well as its formatting.
-While this could be considered a different aspect of the output, the arguments are closely tied to the value of the placeholder synthesised.
-For example an integer is given a min and max value.
-This could be done Just In Time for generating the respective entity or document.
-
-When an entity is parsed of the form `${<id>type::subtype:arg1,arg2}`
-it should be mapped to an optional entity => Some()
