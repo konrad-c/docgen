@@ -52,8 +52,9 @@ impl Entity {
             "phone" => Some(self.phone.phone()),
             "phone::mobile" => Some(self.phone.mobile()),
             "phone::landline" => Some(self.phone.landline()),
-            "place" => Some(self.location.place()),
-            "address" => Some(self.location.address()),
+            "location::place" => Some(self.location.place()),
+            "location::street" => Some(self.location.street()),
+            "location::address" => Some(self.location.address()),
             "float" => placeholder.args
                 .and_then(|args:String| FloatArgs::parse(&args))
                 .map(|args: FloatArgs| self.float.get(args).to_string()),
@@ -67,10 +68,4 @@ impl Entity {
             _ => None
         }
     }
-
-    // fn phone(placeholder: Placeholder) -> String {
-    //     match (placeholder.data_type, placeholder.args) {
-
-    //     }
-    // }
 }

@@ -2,13 +2,13 @@
 extern crate lazy_static;
 
 mod placeholder;
-mod generator;
+mod entity;
 
 // use placeholder::Placeholder;
 use placeholder::Placeholder;
 use placeholder::error::PlaceholderParseError;
-use generator::collection::EntityCollection;
-use generator::Entity;
+use entity::collection::EntityCollection;
+use entity::Entity;
 use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures, Match};
 use std::collections::HashMap;
@@ -26,19 +26,24 @@ Example templates:
     '{\"id\": \"${guid}\", \"phone\": \"${phone}\"}'
 
 Supported data types:
+    Referencing types and their subtypes is done with the syntax: 'type::subtype:arg1,arg2' e.g. 'name::first'
     Complex types:
-    - first_name
-    - last_name
-    - full_name
-    - address
+    - name
+        - first
+        - last
+        - full
+    - location
+        - address
+        - place
+        - street
     - phone
-    - place
+        - mobile
+        - landline
 
     Primitive types:
-    - int (integer between 0 and 10)
     - int:MIN,MAX (integer between MIN and MAX values)
-    - float (values default between 0 and 1)
-    - float:ROUNDING (number of decimal places to round float value)
+    - float:MIN,MAX (float value between MIN and MAX values)
+    - set:A,B,C,D (randomly selected element of the provided set e.g. B)
     - guid
         ")
         .arg(Arg::with_name("template")
@@ -72,14 +77,10 @@ Supported data types:
         .parse::<u64>()
         .unwrap_or(1);
     
-    // let mut all_docs: String = String::with_capacity(template.len() * repetitions as usize);
     for _ in 0..repetitions {
         let generated_doc: String = populate_template(&template);
         println!("{}", &generated_doc);
-        // all_docs.push_str(&generated_doc);
-        // all_docs.push_str("\n");
     }
-    // println!("{}", all_docs);
     Ok(())
 }
 

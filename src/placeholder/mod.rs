@@ -34,7 +34,6 @@ impl Placeholder {
     }
 }
 
-
 #[cfg(test)]
 mod placeholder_stub_tests {
     use super::*;

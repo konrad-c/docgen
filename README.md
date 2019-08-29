@@ -40,30 +40,23 @@ e.g. ./docgen -f example_template.tpl -n 8000
 
 ## Supported placeholders
 The placeholder types supported currently include:
+Referencing types and their subtypes is done with the syntax: 'type::subtype:arg1,arg2' e.g. 'name::first'
 
-Complex types:
-- first_name
-- last_name
-- full_name
-- address
+### Complex types:
+- name
+    - first
+    - last
+    - full
+- location
+    - address
+    - place
+    - street
 - phone
-- place
+    - mobile
+    - landline
 
 Primitive types:
-- int (integer between 0 and 10)
 - int:MIN,MAX (integer between MIN and MAX values)
-- float (values default between 0 and 1)
-- float:ROUNDING (number of decimal places to round float value)
+- float:MIN,MAX (float value between MIN and MAX values)
+- set:A,B,C,D (randomly selected element of the provided set e.g. B)
 - guid
-
-## TODO
-- [x] Phone number
-    - [x] Mobile
-    - [x] Landline
-    - [x] Country codes
-- [x] Random selection of supplied strings e.g. ${select:A,B,C}
-- [x] Hierarchical placeholders split by `::` e.g. `${phone::mobile}`
-- [x] Option to relate first name and last name to the full name generated
-    - [x] Related placeholders by identifier e.g. `${<id>full_name} ${<id>first_name}` e.g. `${<person1>full_name} ${<person1>first_name}`
-    - [x] Each entity with an ID contains fields for each placeholder type that is lazy loaded as required and as each placeholder is populated.
-    Placeholders are populated by reaching into the desired entity and getting the field for that type of exists, otherwise it is generated
