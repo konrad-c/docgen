@@ -6,7 +6,6 @@ use place::PLACE;
 use street::STREET;
 use street_type::STREET_TYPE;
 use super::util;
-use super::primitive::PrimitiveGenerator;
 
 use lazycell::LazyCell;
 
@@ -60,11 +59,11 @@ impl LocationGenerator {
     }
 
     fn unit_number() -> String {
-        PrimitiveGenerator::int(1, 50).to_string()
+        LocationGenerator::int(1, 50).to_string()
     }
 
     fn house_number() -> String {
-        PrimitiveGenerator::int(1, 500).to_string()
+        LocationGenerator::int(1, 500).to_string()
     }
 
     fn street_number() -> String {
@@ -72,5 +71,11 @@ impl LocationGenerator {
             true => format!("{}/{}", LocationGenerator::unit_number(), LocationGenerator::house_number()),
             false => format!("{}", LocationGenerator::house_number())
         }
+    }
+
+    fn int(min: i64, max: i64) -> i64 {
+        let range: i64 = max - min;
+        let rand_in_range: f64 = (range as f64) * rand::random::<f64>();
+        return min + rand_in_range as i64;
     }
 }

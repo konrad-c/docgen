@@ -2,7 +2,7 @@ mod country_code;
 
 use country_code::COUNTRY_CODE;
 use super::util;
-use super::primitive::{PrimitiveGenerator};
+use super::primitive::int::Int;
 use lazycell::LazyCell;
 
 #[derive(Debug, Clone)]
@@ -47,15 +47,21 @@ impl PhoneGenerator {
             true => format!("({})", PhoneGenerator::country_code()),
             false => String::from("0")
         };
-        format!("{}4{:02} {:03} {:03}", code, PrimitiveGenerator::int(0, 10e1 as i64), PrimitiveGenerator::int(0, 10e2 as i64), PrimitiveGenerator::int(0, 10e2 as i64))
+        format!("{}4{:02} {:03} {:03}", code, PhoneGenerator::int(0, 10e1 as i64), PhoneGenerator::int(0, 10e2 as i64), PhoneGenerator::int(0, 10e2 as i64))
     }
 
     fn landline(use_country_code: bool) -> String {
-        let number: String = format!("9{:03} {:04}", PrimitiveGenerator::int(0, 10e2 as i64), PrimitiveGenerator::int(0, 10e3 as i64));
+        let number: String = format!("9{:03} {:04}", PhoneGenerator::int(0, 10e2 as i64), PhoneGenerator::int(0, 10e3 as i64));
         match use_country_code {
             true => format!("({}) {}", PhoneGenerator::country_code(), number),
             false => number
         }
+    }
+
+    fn int(min: i64, max: i64) -> i64 {
+        let range: i64 = max - min;
+        let rand_in_range: f64 = (range as f64) * rand::random::<f64>();
+        return min + rand_in_range as i64;
     }
 }
 

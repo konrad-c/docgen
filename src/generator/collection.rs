@@ -1,4 +1,4 @@
-use super::entity::Entity;
+use super::Entity;
 use std::collections::HashMap;
 
 pub struct EntityCollection<'t> {

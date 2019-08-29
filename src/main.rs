@@ -8,7 +8,7 @@ mod generator;
 use placeholder::Placeholder;
 use placeholder::error::PlaceholderParseError;
 use generator::collection::EntityCollection;
-use generator::entity::Entity;
+use generator::Entity;
 use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures, Match};
 use std::collections::HashMap;
@@ -93,25 +93,25 @@ fn populate_template(template: &str) -> String {
     let populated_template = PLACEHOLDER_REGEX.replace_all(template, |captures: &Captures| {
         let matched_text: String = captures.get(0).unwrap().as_str().to_owned(); 
 
-        let entity: Option<&mut Entity> = captures.name("entity_id")
+        let entity_ref: Option<&mut Entity> = captures.name("entity_id")
             .map(|id: Match| id.as_str().to_owned())
             .map(|id: String| entity_collection.get(id));
 
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
         let placeholder_data: Result<Placeholder, PlaceholderParseError> = Placeholder::parse(placeholder_str);
-        if let Ok(placeholder) = placeholder_data {
-            return match entity {
-                Some(e) => e.value_of(placeholder),
+        let data: Option<String> = placeholder_data.ok()
+            .and_then(|placeholder: Placeholder| match entity_ref {
+                Some(entity) => entity.value_of(placeholder),
                 None => Entity::new().value_of(placeholder)
-            };
-        }
+            });
 
-        if let Err(parse_error) = placeholder_data {
-            println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
-            return format!("{}", matched_text);
+        match data {
+            Some(value) => value,
+            None => {
+                // println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
+                format!("Error with placeholder: {}", matched_text)
+            }
         }
-        
-        String::new()
     });
     format!("{}", populated_template)
 }

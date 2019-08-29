@@ -1,7 +1,23 @@
-pub trait Args {
-    fn default() -> Self;
-    fn help() -> String;
-    fn parse(args: &String) -> Option<Self> where Self: Sized;
+use lazycell::LazyCell;
+use super::args::Args;
+
+#[derive(Debug,Clone)]
+pub struct Int(LazyCell<i64>);
+
+impl Int {
+    pub fn new() -> Int {
+        Int( LazyCell::new() )
+    }
+
+    pub fn get(&self, args: IntArgs) -> i64 {
+        *self.0.borrow_with(|| Int::generate(args.min, args.max))
+    }
+
+    fn generate(min: i64, max: i64) -> i64 {
+        let range: i64 = max - min;
+        let rand_in_range: f64 = (range as f64) * rand::random::<f64>();
+        return min + rand_in_range as i64;
+    }
 }
 
 #[derive(Debug)]
