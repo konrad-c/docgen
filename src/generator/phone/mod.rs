@@ -2,7 +2,6 @@ mod country_code;
 
 use country_code::COUNTRY_CODE;
 use super::util;
-use super::primitive::int::Int;
 use lazycell::LazyCell;
 
 #[derive(Debug, Clone)]

@@ -43,16 +43,6 @@ impl Entity {
         }
     }
 
-    fn get_fn_and_parser(placeholder: Placeholder) -> Option<impl Args> {
-        if let Some(args) = &placeholder.args {
-            return match placeholder.data_type.as_str() {
-                "int" => IntArgs::parse(&args),
-                _ => None
-            };
-        }
-        None
-    }
-
     pub fn value_of(&mut self, placeholder: Placeholder) -> Option<String> {
         println!("{}, {:?}", placeholder.data_type, placeholder.args);
         match placeholder.data_type.as_str() {

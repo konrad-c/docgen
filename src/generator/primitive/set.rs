@@ -35,14 +35,14 @@ impl Args for SetArgs {
     }
 
     fn parse(args: &String) -> Option<SetArgs> {
-        let arg_vec: Vec<String> = args.split(",")
-            .into_iter()
-            .map(|s: &str| s.to_owned())
-            .collect();
-        if arg_vec.is_empty(){
-            None
-        } else {
-            Some(SetArgs { options: arg_vec })
+        match args.is_empty() {
+            true => None,
+            false => Some(SetArgs { 
+                options :args.split(",")
+                    .into_iter()
+                    .map(|s: &str| s.to_owned())
+                    .collect()
+            })
         }
     }
 }
@@ -60,7 +60,6 @@ mod int_args_tests {
     #[test]
     fn parse_empty_returns_none() {
         let parsed_args = SetArgs::parse(&String::new());
-        println!("{:?}", parsed_args);
         assert!(parsed_args.is_none());
     }
 }

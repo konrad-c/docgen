@@ -12,10 +12,10 @@ impl PlaceholderParseError {
         }
     }
 
-    pub fn invalid_arg(placeholder: &str, arg_name: &str, arg_type: &str, example: &str) -> PlaceholderParseError {
-        PlaceholderParseError { 
-            token: String::from(arg_name),
-            reason: format!("Invalid argument for placeholder '{}'. Argument '{}' should be of type: {}. e.g. {}", placeholder, arg_name, arg_type, example)
-        }
-    }
+    // pub fn invalid_arg(placeholder: &str, arg_name: &str, arg_type: &str, example: &str) -> PlaceholderParseError {
+    //     PlaceholderParseError { 
+    //         token: String::from(arg_name),
+    //         reason: format!("Invalid argument for placeholder '{}'. Argument '{}' should be of type: {}. e.g. {}", placeholder, arg_name, arg_type, example)
+    //     }
+    // }
 }
