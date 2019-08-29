@@ -1,9 +1,9 @@
 {
-    "int": ${<1>int},
-    "int": ${<1>int},
+    "int": ${int:0,1},
+    "int": ${int:0,10},
     "int_min_max": ${int:-100,100},
-    "float": ${float},
-    "float_rounded": ${float:3},
+    "float": ${float:0,1},
+    "float_rounded": ${float:-100,100},
     "name::full": "${<1>name::full}",
     "name::full": "${<1>name::full}",
     "name::first": "${<1>name::first}",
@@ -14,8 +14,8 @@
     "address": "${address}",
     "guid": "${guid}",
     "phone": "${<1>phone}",
-    "phone::mobile": "${<1>phone::landline}",
-    "phone::landline": "${<1>phone::mobile}",
+    "phone::mobile": "${<1>phone::mobile}",
+    "phone::landline": "${<1>phone::landline}",
     "set": "${set:First,Second,Third}"
     "set_with_spaces": "${set:first one,then second,finally third}"
 }

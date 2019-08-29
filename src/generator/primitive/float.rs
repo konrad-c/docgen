@@ -5,23 +5,27 @@ use super::args::Args;
 pub struct Float(LazyCell<f64>);
 
 impl Float {
+    const DEFAULT_ROUNDING: i8 = 6;
+
     pub fn new() -> Float {
         Float( LazyCell::new() )
     }
 
     pub fn get<'t>(&self, args: FloatArgs) -> f64 {
-        *self.0.borrow_with(|| Float::generate(args.rounding))
+        *self.0.borrow_with(|| Float::generate(args.min, args.max))
     }
 
-    fn generate(rounding: i8) -> f64 {
-        let number: f64 = rand::random::<f64>();
-        math::round::floor(number, rounding)
+    fn generate(min: f64, max: f64) -> f64 {
+        let range: f64 = max - min;
+        let rand_in_range: f64 = range * rand::random::<f64>();
+        math::round::floor(rand_in_range, Float::DEFAULT_ROUNDING)
     }
 }
 
 #[derive(Debug)]
 pub struct FloatArgs {
-    pub rounding: i8
+    pub min: f64,
+    pub max: f64,
 }
 
 impl Args for FloatArgs {
@@ -30,17 +34,26 @@ impl Args for FloatArgs {
     }
 
     fn default() -> FloatArgs {
-        FloatArgs { rounding: 5 }
+        FloatArgs {
+            min: 0.0,
+            max: 1.0,
+        }
     }
 
     fn parse<'t>(args: &String) -> Option<FloatArgs> {
         let arg_vec: Vec<&str> = args.split(",")
             .into_iter()
             .collect();
-        if let [rounding] = &arg_vec[..] {
-            return rounding.parse::<i8>().ok()
-                .map(|decimal_places: i8| FloatArgs { rounding: decimal_places });
+        if let [min, max] = arg_vec[..] {
+            let min_val: Result<f64, _> = min.parse::<f64>();
+            let max_val: Result<f64, _> = max.parse::<f64>();
+            if min_val.is_ok() && max_val.is_ok() {
+                return Some(FloatArgs {
+                    min: min_val.unwrap(), max: max_val.unwrap() 
+                });
+            }
         }
+        
         return None;
     }
 }
@@ -51,8 +64,9 @@ mod int_args_tests {
 
     #[test]
     fn parse_valid_args() {
-        let parsed_args = FloatArgs::parse(&"1".to_owned()).unwrap();
-        assert_eq!(parsed_args.rounding, 1);
+        let parsed_args = FloatArgs::parse(&"1,2".to_owned()).unwrap();
+        assert_eq!(parsed_args.min, 1f64);
+        assert_eq!(parsed_args.max, 2f64);
     }
 
     #[test]
