@@ -1,0 +1,23 @@
+{
+    "_id": "${guid}",
+    "_match": ${dist::normal:0.5,0.15},
+    "name": "${<1>name::full}",
+    "pref_name": "${<1>name::first}",
+    "age": ${int:21,70},
+    "bank_details": {
+        "bsb": "${int:0,10}${int:0,10}${int:0,10} ${int:0,10}${int:0,10}${int:0,10}",
+        "account_number": "${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}",
+        "account_holder_name": "${<1>name::full}"
+    },
+    "contact": {
+        "mobile": "${<1>phone::mobile}",
+        "home": "${<1>phone::landline}",
+        "address": "${<1>location::address}"
+    },
+    "emergency_contact": {
+        "name": "${<2>name::full}",
+        "mobile": "${<2>phone::mobile}",
+        "home": "${<2>phone::landline}",
+        "address": "${<2>location::address}"
+    }
+}

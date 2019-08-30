@@ -56,7 +56,6 @@ impl Entity {
     }
 
     pub fn value_of(&mut self, placeholder: Placeholder) -> Result<String, PlaceholderParseError> {
-        println!("{}, {:?}", placeholder.data_type, placeholder.args);
         match placeholder.data_type.as_str() {
             name_datatype if name_datatype.starts_with("name") => self.name_placeholder(&placeholder),
             phone_datatype if phone_datatype.starts_with("phone") => self.phone_placeholder(&placeholder),
