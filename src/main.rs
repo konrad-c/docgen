@@ -39,6 +39,8 @@ Supported data types:
     - phone
         - mobile
         - landline
+    - dist (random distributions)
+        - normal:MEAN,STANDARD_DEVIATION (normally distributed random variable with mean and standard deviation)
 
     Primitive types:
     - int:MIN,MAX (integer between MIN and MAX values)

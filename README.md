@@ -54,6 +54,8 @@ Referencing types and their subtypes is done with the syntax: 'type::subtype:arg
 - phone
     - mobile
     - landline
+- dist (random distributions)
+    - normal:MEAN,STANDARD_DEVIATION (normally distributed random variable with mean and standard deviation)
 
 Primitive types:
 - int:MIN,MAX (integer between MIN and MAX values)
