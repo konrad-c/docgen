@@ -14,7 +14,8 @@
     "phone": "${<1>phone}",
     "phone::mobile": "${<1>phone::mobile}",
     "phone::landline": "${<1>phone::landline}",
-    "set": "${set:First,Second,Third}"
+    "set": "${set:First,Second,Third}",
+    "dist::normal": ${dist::normal:0,1},
     "error": "${unsupported}",
     "error_invalid_args": ${float:1}
 }

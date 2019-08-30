@@ -5,6 +5,7 @@ mod primitive;
 mod name;
 mod util;
 mod phone;
+mod distribution;
 mod args;
 
 use super::placeholder::Placeholder;
@@ -16,19 +17,21 @@ use primitive::guid::Guid;
 use primitive::int::{Int,IntArgs};
 use primitive::set::{Set,SetArgs};
 use phone::Phone;
+use distribution::normal::{Normal, NormalArgs};
 
 use args::Args;
 
 
 #[derive(Debug, Clone)]
 pub struct Entity {
-    pub name: Name,
-    pub location: Location,
-    pub float: Float,
-    pub guid: Guid,
-    pub int: Int,
-    pub set: Set,
-    pub phone: Phone
+    name: Name,
+    location: Location,
+    float: Float,
+    guid: Guid,
+    int: Int,
+    set: Set,
+    phone: Phone,
+    normal: Normal
 }
 
 impl Entity {
@@ -40,7 +43,8 @@ impl Entity {
             guid: Guid::new(),
             int: Int::new(),
             set: Set::new(),
-            phone: Phone::new()
+            phone: Phone::new(),
+            normal: Normal::new()
         }
     }
 
@@ -50,6 +54,7 @@ impl Entity {
             name_datatype if name_datatype.starts_with("name") => self.name_placeholder(&placeholder),
             phone_datatype if phone_datatype.starts_with("phone") => self.phone_placeholder(&placeholder),
             location_datatype if location_datatype.starts_with("location") => self.location_placeholder(&placeholder),
+            dist_datatype if dist_datatype.starts_with("dist") => self.dist_placeholder(&placeholder),
             "float" => placeholder.args.clone()
                 .and_then(|args:String| FloatArgs::parse(&args))
                 .map(|args: FloatArgs| self.float.get(args).to_string())
@@ -63,6 +68,16 @@ impl Entity {
                 .and_then(|args:String| SetArgs::parse(&args))
                 .map(|args: SetArgs| self.set.get(args))
                 .ok_or(PlaceholderParseError::invalid_arg(&placeholder, SetArgs::help())),
+            _ => Err(PlaceholderParseError::invalid_placeholder(placeholder.to_string().as_str()))
+        }
+    }
+
+    fn dist_placeholder(&mut self, placeholder: &Placeholder) -> Result<String, PlaceholderParseError> {
+        match placeholder.data_type.as_str() {
+            "dist::normal" => placeholder.args.clone()
+                .and_then(|args:String| NormalArgs::parse(&args))
+                .map(|args: NormalArgs| self.normal.get(args).to_string())
+                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, NormalArgs::help())),
             _ => Err(PlaceholderParseError::invalid_placeholder(placeholder.to_string().as_str()))
         }
     }
