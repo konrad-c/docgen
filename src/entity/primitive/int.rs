@@ -27,8 +27,8 @@ pub struct IntArgs {
 }
 
 impl Args for IntArgs {
-    fn help() -> String {
-        format!("")
+    fn help() -> &'static str {
+        ""
     }
 
     fn default() -> IntArgs {

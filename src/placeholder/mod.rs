@@ -32,6 +32,10 @@ impl Placeholder {
             .map(|args: &str| args.trim_start_matches(":"))
             .map(|args: &str| args.to_owned())
     }
+
+    pub fn to_string(&self) -> String {
+        format!("${{{}:{}}}", self.data_type, self.args.clone().unwrap_or_default())
+    }
 }
 
 #[cfg(test)]

@@ -29,8 +29,8 @@ pub struct FloatArgs {
 }
 
 impl Args for FloatArgs {
-    fn help() -> String {
-        format!("")
+    fn help() -> &'static str {
+        ""
     }
 
     fn default() -> FloatArgs {

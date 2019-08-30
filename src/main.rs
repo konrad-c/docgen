@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
-mod placeholder;
+pub mod placeholder;
 mod entity;
 
 // use placeholder::Placeholder;
@@ -100,16 +100,16 @@ fn populate_template(template: &str) -> String {
 
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
         let placeholder_data: Result<Placeholder, PlaceholderParseError> = Placeholder::parse(placeholder_str);
-        let data: Option<String> = placeholder_data.ok()
+        let data: Result<String, PlaceholderParseError> = placeholder_data
             .and_then(|placeholder: Placeholder| match entity_ref {
                 Some(entity) => entity.value_of(placeholder),
                 None => Entity::new().value_of(placeholder)
             });
 
         match data {
-            Some(value) => value,
-            None => {
-                // println!("Error: '{}' failed to parse on token '{}' because: {}", matched_text, parse_error.token, parse_error.reason);
+            Ok(value) => value,
+            Err(parse_error) => {
+                println!("Error with placeholder '{}': {}", parse_error.placeholder, parse_error.reason);
                 format!("Error with placeholder: {}", matched_text)
             }
         }

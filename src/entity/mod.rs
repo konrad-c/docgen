@@ -7,7 +7,8 @@ mod util;
 mod phone;
 mod args;
 
-use super::placeholder::{Placeholder};
+use super::placeholder::Placeholder;
+use super::placeholder::error::PlaceholderParseError;
 use name::Name;
 use location::Location;
 use primitive::float::{Float,FloatArgs};
@@ -43,29 +44,32 @@ impl Entity {
         }
     }
 
-    pub fn value_of(&mut self, placeholder: Placeholder) -> Option<String> {
+    pub fn value_of(&mut self, placeholder: Placeholder) -> Result<String, PlaceholderParseError> {
         println!("{}, {:?}", placeholder.data_type, placeholder.args);
         match placeholder.data_type.as_str() {
-            "name::first" => Some(self.name.first()),
-            "name::last" => Some(self.name.last()),
-            "name::full" => Some(self.name.full()),
-            "phone" => Some(self.phone.phone()),
-            "phone::mobile" => Some(self.phone.mobile()),
-            "phone::landline" => Some(self.phone.landline()),
-            "location::place" => Some(self.location.place()),
-            "location::street" => Some(self.location.street()),
-            "location::address" => Some(self.location.address()),
-            "float" => placeholder.args
+            "name::first" => Ok(self.name.first()),
+            "name::last" => Ok(self.name.last()),
+            "name::full" => Ok(self.name.full()),
+            "phone" => Ok(self.phone.phone()),
+            "phone::mobile" => Ok(self.phone.mobile()),
+            "phone::landline" => Ok(self.phone.landline()),
+            "location::place" => Ok(self.location.place()),
+            "location::street" => Ok(self.location.street()),
+            "location::address" => Ok(self.location.address()),
+            "float" => placeholder.args.clone()
                 .and_then(|args:String| FloatArgs::parse(&args))
-                .map(|args: FloatArgs| self.float.get(args).to_string()),
-            "int"  => placeholder.args
+                .map(|args: FloatArgs| self.float.get(args).to_string())
+                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, FloatArgs::help())),
+            "int"  => placeholder.args.clone()
                 .and_then(|args:String| IntArgs::parse(&args))
-                .map(|args: IntArgs| self.int.get(args).to_string()),
-            "guid" => Some(self.guid.get()),
-            "set" => placeholder.args
+                .map(|args: IntArgs| self.int.get(args).to_string())
+                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, IntArgs::help())),
+            "guid" => Ok(self.guid.get()),
+            "set" => placeholder.args.clone()
                 .and_then(|args:String| SetArgs::parse(&args))
-                .map(|args: SetArgs| self.set.get(args)),
-            _ => None
+                .map(|args: SetArgs| self.set.get(args))
+                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, SetArgs::help())),
+            _ => Err(PlaceholderParseError::invalid_placeholder(placeholder.to_string().as_str()))
         }
     }
 }

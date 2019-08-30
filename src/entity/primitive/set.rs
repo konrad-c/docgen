@@ -26,8 +26,8 @@ pub struct SetArgs {
 }
 
 impl Args for SetArgs {
-    fn help() -> String {
-        format!("")
+    fn help() -> &'static str {
+        ""
     }
 
     fn default() -> SetArgs {
