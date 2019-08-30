@@ -48,6 +48,13 @@ impl Entity {
         }
     }
 
+    fn placeholder_with_args<T : Args>(&self, placeholder: &Placeholder, get_func: &mut impl FnMut(T) -> String) -> Result<String, PlaceholderParseError> {
+        placeholder.args.clone()
+            .and_then(|args:String| T::parse(&args))
+            .map(|args: T| get_func(args).to_string())
+            .ok_or(PlaceholderParseError::invalid_arg(&placeholder, T::help()))
+    }
+
     pub fn value_of(&mut self, placeholder: Placeholder) -> Result<String, PlaceholderParseError> {
         println!("{}, {:?}", placeholder.data_type, placeholder.args);
         match placeholder.data_type.as_str() {
@@ -55,29 +62,17 @@ impl Entity {
             phone_datatype if phone_datatype.starts_with("phone") => self.phone_placeholder(&placeholder),
             location_datatype if location_datatype.starts_with("location") => self.location_placeholder(&placeholder),
             dist_datatype if dist_datatype.starts_with("dist") => self.dist_placeholder(&placeholder),
-            "float" => placeholder.args.clone()
-                .and_then(|args:String| FloatArgs::parse(&args))
-                .map(|args: FloatArgs| self.float.get(args).to_string())
-                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, FloatArgs::help())),
-            "int"  => placeholder.args.clone()
-                .and_then(|args:String| IntArgs::parse(&args))
-                .map(|args: IntArgs| self.int.get(args).to_string())
-                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, IntArgs::help())),
+            "float" => self.placeholder_with_args(&placeholder, &mut |args: FloatArgs| self.float.get(args).to_string()),
+            "int"  => self.placeholder_with_args(&placeholder, &mut |args: IntArgs| self.int.get(args).to_string()),
+            "set" => self.placeholder_with_args(&placeholder, &mut |args: SetArgs| self.set.get(args)),
             "guid" => Ok(self.guid.get()),
-            "set" => placeholder.args.clone()
-                .and_then(|args:String| SetArgs::parse(&args))
-                .map(|args: SetArgs| self.set.get(args))
-                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, SetArgs::help())),
             _ => Err(PlaceholderParseError::invalid_placeholder(placeholder.to_string().as_str()))
         }
     }
 
     fn dist_placeholder(&mut self, placeholder: &Placeholder) -> Result<String, PlaceholderParseError> {
         match placeholder.data_type.as_str() {
-            "dist::normal" => placeholder.args.clone()
-                .and_then(|args:String| NormalArgs::parse(&args))
-                .map(|args: NormalArgs| self.normal.get(args).to_string())
-                .ok_or(PlaceholderParseError::invalid_arg(&placeholder, NormalArgs::help())),
+            "dist::normal" => self.placeholder_with_args(&placeholder, &mut |args: NormalArgs| self.normal.get(args).to_string()),
             _ => Err(PlaceholderParseError::invalid_placeholder(placeholder.to_string().as_str()))
         }
     }

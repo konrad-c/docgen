@@ -16,6 +16,8 @@
     "phone::landline": "${<1>phone::landline}",
     "set": "${set:First,Second,Third}",
     "dist::normal": ${dist::normal:0,1},
+    "dist::normal<1>": ${<1>dist::normal:0,1},
+    "dist::normal<1>": ${<1>dist::normal:0,1},
     "error": "${unsupported}",
     "error_invalid_args": ${float:1}
 }
