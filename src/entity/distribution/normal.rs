@@ -1,23 +1,13 @@
-use lazycell::LazyCell;
 use super::args::Args;
 use rand_distr::Distribution;
 
-#[derive(Debug,Clone)]
-pub struct Normal(LazyCell<f64>);
+pub struct Normal;
 
 impl Normal {
     const DEFAULT_ROUNDING: i8 = 6;
 
-    pub fn new() -> Normal {
-        Normal( LazyCell::new() )
-    }
-
-    pub fn get(&self, args: NormalArgs) -> f64 {
-        *self.0.borrow_with(|| Normal::generate(args.mean, args.stddev))
-    }
-
-    fn generate(mean: f64, stddev: f64) -> f64 {
-        let dist = rand_distr::Normal::new(mean, stddev).unwrap();
+    pub fn generate(args: NormalArgs) -> f64 {
+        let dist = rand_distr::Normal::new(args.mean, args.stddev).unwrap();
         let val = dist.sample(&mut rand::thread_rng());
         math::round::floor(val, Normal::DEFAULT_ROUNDING)
     }

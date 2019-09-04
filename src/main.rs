@@ -90,6 +90,10 @@ lazy_static! {
     static ref PLACEHOLDER_REGEX: Regex = Regex::new(r"\$\{(?:<(?P<entity_id>[a-zA-Z0-9]+)>)?(?P<placeholder>[^\}]*)\}").unwrap();
 }
 
+fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
+    Vec::new()
+}
+
 fn populate_template(template: &str) -> String {
     let entity_collection: &mut EntityCollection = &mut EntityCollection { data: &mut HashMap::new() };
 
@@ -101,20 +105,12 @@ fn populate_template(template: &str) -> String {
             .map(|id: String| entity_collection.get(id));
 
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
-        let placeholder_data: Result<Placeholder, PlaceholderParseError> = Placeholder::parse(placeholder_str);
-        let data: Result<String, PlaceholderParseError> = placeholder_data
-            .and_then(|placeholder: Placeholder| match entity_ref {
-                Some(entity) => entity.value_of(placeholder),
-                None => Entity::new().value_of(placeholder)
-            });
-
-        match data {
-            Ok(value) => value,
-            Err(parse_error) => {
-                println!("Error with placeholder '{}': {}", parse_error.placeholder, parse_error.reason);
-                format!("Error with placeholder: {}", matched_text)
-            }
-        }
+        let placeholder: Placeholder = Placeholder::parse(placeholder_str);
+        let data = match entity_ref {
+            Some(entity) => entity.value_of(placeholder),
+            None => Entity::new().value_of(placeholder)
+        };
+        data.unwrap()
     });
     format!("{}", populated_template)
 }

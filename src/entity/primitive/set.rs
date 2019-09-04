@@ -1,20 +1,11 @@
 use super::util;
 use super::args::Args;
-use lazycell::LazyCell;
 
-#[derive(Debug,Clone)]
-pub struct Set(LazyCell<String>);
+pub struct Set;
 
 impl Set {
-    pub fn new() -> Set {
-        Set( LazyCell::new() )
-    }
-
-    pub fn get<'t>(&self, args: SetArgs) -> String {
-        self.0.borrow_with(|| Set::generate(&args.options)).to_owned()
-    }
-
-    fn generate<'t>(set: &Vec<String>) -> String {
+    pub fn generate<'t>(args: SetArgs) -> String {
+        let set: &Vec<String> = &args.options;
         let index: usize = util::rand_index(set.len());
         return set[index].to_string();
     }

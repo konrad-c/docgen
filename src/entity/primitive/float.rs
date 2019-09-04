@@ -1,22 +1,12 @@
-use lazycell::LazyCell;
 use super::args::Args;
 
-#[derive(Debug,Clone)]
-pub struct Float(LazyCell<f64>);
+pub struct Float;
 
 impl Float {
     const DEFAULT_ROUNDING: i8 = 6;
 
-    pub fn new() -> Float {
-        Float( LazyCell::new() )
-    }
-
-    pub fn get<'t>(&self, args: FloatArgs) -> f64 {
-        *self.0.borrow_with(|| Float::generate(args.min, args.max))
-    }
-
-    fn generate(min: f64, max: f64) -> f64 {
-        let range: f64 = max - min;
+    pub fn generate(args: FloatArgs) -> f64 {
+        let range: f64 = args.max - args.min;
         let rand_in_range: f64 = range * rand::random::<f64>();
         math::round::floor(rand_in_range, Float::DEFAULT_ROUNDING)
     }

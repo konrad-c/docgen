@@ -14,16 +14,21 @@ pub struct Placeholder {
 }
 
 impl Placeholder {
-    pub fn parse<'t>(placeholder: &'t str) -> Result<Placeholder, PlaceholderParseError> {
-        let capture_groups: Result<Captures, PlaceholderParseError> = match PLACEHOLDER_REGEX.captures(placeholder) {
-            Some(captures) => Ok(captures),
-            None => Err(PlaceholderParseError::invalid_placeholder(placeholder))
-        };
-        capture_groups.map(|captures: Captures| {
-            let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
-            let arguments: Option<String> = Placeholder::get_args(&captures);
-            Placeholder { data_type: data_type, args: arguments }
-        })
+    pub fn validate<'t>(placeholder: &'t str) -> Option<PlaceholderParseError> {
+        match PLACEHOLDER_REGEX.captures(placeholder) {
+            Some(captures) => None,
+            None => Some(PlaceholderParseError::invalid_placeholder(placeholder))
+        }
+    }
+
+    pub fn parse<'t>(placeholder: &'t str) -> Placeholder {
+        PLACEHOLDER_REGEX.captures(placeholder)
+            .map(|captures: Captures| {
+                let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
+                let arguments: Option<String> = Placeholder::get_args(&captures);
+                Placeholder { data_type: data_type, args: arguments }
+            })
+            .unwrap()
     }
 
     fn get_args(captures: &Captures) -> Option<String> {
@@ -44,45 +49,29 @@ mod placeholder_stub_tests {
 
     #[test]
     fn parse_placeholder_stub_without_args() {
-        match Placeholder::parse("test") {
-            Ok(placeholder) => {
-                assert_eq!(placeholder.data_type, "test");
-                assert_eq!(placeholder.args, None);
-            },
-            Err(e) => panic!(e.reason)
-        }
+        let placeholder = Placeholder::parse("test");
+        assert_eq!(placeholder.data_type, "test");
+        assert_eq!(placeholder.args, None);
     }
     
     #[test]
     fn parse_placeholder_stub_with_args() {
-        match Placeholder::parse("test:1,2") {
-            Ok(placeholder) => {
-                assert_eq!(placeholder.data_type, "test");
-                assert_eq!(placeholder.args, Some(String::from("1,2")));
-            },
-            Err(e) => panic!(e.reason)
-        }
+        let placeholder = Placeholder::parse("test:1,2");
+        assert_eq!(placeholder.data_type, "test");
+        assert_eq!(placeholder.args, Some(String::from("1,2")));
     }
     
     #[test]
     fn forgive_placeholder_stub_without_args_but_with_arg_separator() {
-        match Placeholder::parse("test:1,2") {
-            Ok(placeholder) => {
-                assert_eq!(placeholder.data_type, "test");
-                assert_eq!(placeholder.args, Some(String::from("1,2")));
-            },
-            Err(e) => panic!(e.reason)
-        }
+        let placeholder = Placeholder::parse("test:1,2");
+        assert_eq!(placeholder.data_type, "test");
+        assert_eq!(placeholder.args, Some(String::from("1,2")));
     }
     
     #[test]
     fn placeholder_stub_with_subtypes_and_args() {
-        match Placeholder::parse("test::example:1,2") {
-            Ok(placeholder) => {
-                assert_eq!(placeholder.data_type, "test::example");
-                assert_eq!(placeholder.args, Some(String::from("1,2")));
-            },
-            Err(e) => panic!(e.reason)
-        }
+        let placeholder = Placeholder::parse("test::example:1,2");
+        assert_eq!(placeholder.data_type, "test::example");
+        assert_eq!(placeholder.args, Some(String::from("1,2")));
     }
 }
