@@ -41,6 +41,10 @@ impl Entity {
         }
     }
 
+    pub fn validate<T : Args>(placeholder: &Placeholder) -> Option<PlaceholderParseError> {
+        
+    }
+
     fn placeholder_with_args<T : Args>(placeholder: &Placeholder, get_func: fn(T) -> String) -> Option<String> {
         placeholder.args.clone()
             .and_then(|args:String| T::parse(&args))
