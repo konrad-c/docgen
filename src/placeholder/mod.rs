@@ -47,7 +47,7 @@ pub enum PlaceholderType {
 
 #[derive(Clone,Debug)]
 pub struct Placeholder {
-    pub original: String,
+    pub original_type: String,
     pub data_type: PlaceholderType,
     pub args: Option<String>
 }
@@ -64,8 +64,9 @@ impl Placeholder {
         PLACEHOLDER_REGEX.captures(placeholder)
             .map(|captures: Captures| {
                 let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
+                let placeholder_type: PlaceholderType = Placeholder::parse_type(&data_type);
                 let arguments: Option<String> = Placeholder::get_args(&captures);
-                Placeholder { data_type: data_type, args: arguments }
+                Placeholder { original_type: data_type, data_type: placeholder_type, args: arguments }
             })
             .unwrap()
     }
@@ -78,7 +79,27 @@ impl Placeholder {
     }
 
     pub fn to_string(&self) -> String {
-        format!("${{{}}}", self.original)
+        format!("${{{}:{}}}", self.original_type, self.args.clone().unwrap_or_default())
+    }
+
+    fn parse_type(data_type: &String) -> PlaceholderType {
+        match data_type.as_str() {
+            "name::first" => PlaceholderType::Name(NameType::First),
+            "name::last" => PlaceholderType::Name(NameType::Last),
+            "name::full" => PlaceholderType::Name(NameType::Full),
+            "phone" => PlaceholderType::Phone(PhoneType::Any),
+            "phone::mobile" => PlaceholderType::Phone(PhoneType::Mobile),
+            "phone::landline" => PlaceholderType::Phone(PhoneType::Landline),
+            "location::place" => PlaceholderType::Location(LocationType::Place),
+            "location::street" => PlaceholderType::Location(LocationType::Street),
+            "location::address" => PlaceholderType::Location(LocationType::Address),
+            "dist::normal" => PlaceholderType::Distribution(DistributionType::Normal),
+            "guid" => PlaceholderType::Guid,
+            "float" => PlaceholderType::Float,
+            "int" => PlaceholderType::Int,
+            "set" => PlaceholderType::Set,
+            _ => PlaceholderType::Int
+        }
     }
 }
 

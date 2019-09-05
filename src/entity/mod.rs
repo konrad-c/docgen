@@ -41,10 +41,6 @@ impl Entity {
         }
     }
 
-    pub fn validate<T : Args>(placeholder: &Placeholder) -> Option<PlaceholderParseError> {
-        
-    }
-
     fn placeholder_with_args<T : Args>(placeholder: &Placeholder, get_func: fn(T) -> String) -> Option<String> {
         placeholder.args.clone()
             .and_then(|args:String| T::parse(&args))
@@ -57,7 +53,7 @@ impl Entity {
     }
 
     fn get_complex(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.data_type.as_str() {
+        match placeholder.original_type.as_str() {
             name_datatype if name_datatype.starts_with("name") => self.name_placeholder(&placeholder),
             phone_datatype if phone_datatype.starts_with("phone") => self.phone_placeholder(&placeholder),
             location_datatype if location_datatype.starts_with("location") => self.location_placeholder(&placeholder),
@@ -66,7 +62,7 @@ impl Entity {
     }
 
     fn get_data(&mut self, placeholder: &Placeholder) -> Option<String> {
-        let primitive_parser = || match placeholder.data_type.as_str() {
+        let primitive_parser = || match placeholder.original_type.as_str() {
             "guid" => Some(Guid::generate()),
             "dist::normal" => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
             "float" => Entity::placeholder_with_args(&placeholder, |args: FloatArgs| Float::generate(args).to_string()),
@@ -79,7 +75,7 @@ impl Entity {
     }
 
     fn name_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.data_type.as_str() {
+        match placeholder.original_type.as_str() {
             "name::first" => Some(self.name.first()),
             "name::last" => Some(self.name.last()),
             "name::full" => Some(self.name.full()),
@@ -88,7 +84,7 @@ impl Entity {
     }
 
     fn phone_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.data_type.as_str() {
+        match placeholder.original_type.as_str() {
             "phone" => Some(self.phone.phone()),
             "phone::mobile" => Some(self.phone.mobile()),
             "phone::landline" => Some(self.phone.landline()),
@@ -97,7 +93,7 @@ impl Entity {
     }
 
     fn location_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.data_type.as_str() {
+        match placeholder.original_type.as_str() {
             "location::place" => Some(self.location.place()),
             "location::street" => Some(self.location.street()),
             "location::address" => Some(self.location.address()),
