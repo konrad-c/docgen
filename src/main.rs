@@ -4,7 +4,7 @@ extern crate lazy_static;
 pub mod placeholder;
 mod entity;
 
-// use placeholder::Placeholder;
+use placeholder::types::{PlaceholderType,PhoneType,NameType,LocationType,DistributionType};
 use placeholder::Placeholder;
 use placeholder::error::PlaceholderParseError;
 use entity::collection::EntityCollection;
@@ -106,11 +106,10 @@ fn populate_template(template: &str) -> String {
 
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
         let placeholder: Placeholder = Placeholder::parse(placeholder_str);
-        let data = match entity_ref {
-            Some(entity) => entity.value_of(placeholder),
-            None => Entity::new().value_of(placeholder)
-        };
-        data.unwrap()
+        match entity_ref {
+            Some(entity) => entity.value_of(&placeholder),
+            None => Entity::new().value_of(&placeholder)
+        }
     });
     format!("{}", populated_template)
 }

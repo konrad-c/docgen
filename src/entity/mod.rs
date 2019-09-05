@@ -8,6 +8,7 @@ mod phone;
 mod distribution;
 mod args;
 
+use super::placeholder::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType};
 use super::placeholder::Placeholder;
 use super::placeholder::error::PlaceholderParseError;
 use name::Name;
@@ -28,7 +29,7 @@ pub struct Entity {
     name: Name,
     location: Location,
     phone: Phone,
-    data: HashMap<String, Option<String>>
+    data: HashMap<String, String>
 }
 
 impl Entity {
@@ -41,63 +42,47 @@ impl Entity {
         }
     }
 
-    fn placeholder_with_args<T : Args>(placeholder: &Placeholder, get_func: fn(T) -> String) -> Option<String> {
-        placeholder.args.clone()
-            .and_then(|args:String| T::parse(&args))
-            .map(|args: T| get_func(args).to_string())
-    }
-
-    pub fn value_of(&mut self, placeholder: Placeholder) -> Option<String> {
-        self.get_complex(&placeholder)
-            .or_else(|| self.get_data(&placeholder))
-    }
-
-    fn get_complex(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.original_type.as_str() {
-            name_datatype if name_datatype.starts_with("name") => self.name_placeholder(&placeholder),
-            phone_datatype if phone_datatype.starts_with("phone") => self.phone_placeholder(&placeholder),
-            location_datatype if location_datatype.starts_with("location") => self.location_placeholder(&placeholder),
-            _ => None
-        }
-    }
-
-    fn get_data(&mut self, placeholder: &Placeholder) -> Option<String> {
-        let primitive_parser = || match placeholder.original_type.as_str() {
-            "guid" => Some(Guid::generate()),
-            "dist::normal" => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
-            "float" => Entity::placeholder_with_args(&placeholder, |args: FloatArgs| Float::generate(args).to_string()),
-            "int"  => Entity::placeholder_with_args(&placeholder, |args: IntArgs| Int::generate(args).to_string()),
-            "set" => Entity::placeholder_with_args(&placeholder, |args: SetArgs| Set::generate(args)),
-            _ => None
-        };
+    pub fn value_of(&mut self, placeholder: &Placeholder) -> String {
         let placeholder_string = placeholder.to_string();
-        self.data.entry(placeholder_string).or_insert_with(primitive_parser).clone()
-    }
-
-    fn name_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.original_type.as_str() {
-            "name::first" => Some(self.name.first()),
-            "name::last" => Some(self.name.last()),
-            "name::full" => Some(self.name.full()),
-            _ => None
+        if self.data.contains_key(&placeholder_string) {
+            return self.data.get(&placeholder_string).unwrap().to_string();
+        } else {
+            let generated_data: String = self.placeholder_parser(&placeholder);
+            let returned_data: String = generated_data.clone();
+            self.data.insert(placeholder_string, generated_data);
+            return returned_data;
         }
     }
 
-    fn phone_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.original_type.as_str() {
-            "phone" => Some(self.phone.phone()),
-            "phone::mobile" => Some(self.phone.mobile()),
-            "phone::landline" => Some(self.phone.landline()),
-            _ => None
-        }
+    fn placeholder_with_args<T : Args>(placeholder: &Placeholder, get_func: fn(T) -> String) -> String {
+        let args: String = placeholder.args.clone().unwrap();
+        let parsed_args: Option<T> = T::parse(&args);
+        get_func(parsed_args.unwrap()).to_string()
     }
 
-    fn location_placeholder(&mut self, placeholder: &Placeholder) -> Option<String> {
-        match placeholder.original_type.as_str() {
-            "location::place" => Some(self.location.place()),
-            "location::street" => Some(self.location.street()),
-            "location::address" => Some(self.location.address()),
-            _ => None
+    fn placeholder_parser(&mut self, placeholder: &Placeholder) -> String {
+        match placeholder.data_type {
+            // PlaceholderType::Name(_) => self.name_placeholder(&placeholder),
+            PlaceholderType::Name(NameType::First) => self.name.first(),
+            PlaceholderType::Name(NameType::Last) => self.name.last(),
+            PlaceholderType::Name(NameType::Full) => self.name.full(),
+
+            // PlaceholderType::Phone(_) => self.phone_placeholder(&placeholder),
+            PlaceholderType::Phone(PhoneType::Any) => self.phone.phone(),
+            PlaceholderType::Phone(PhoneType::Mobile) => self.phone.mobile(),
+            PlaceholderType::Phone(PhoneType::Landline) => self.phone.landline(),
+
+            // PlaceholderType::Location(_) => self.location_placeholder(&placeholder),
+            PlaceholderType::Location(LocationType::Place) => self.location.place(),
+            PlaceholderType::Location(LocationType::Street) => self.location.street(),
+            PlaceholderType::Location(LocationType::Address) => self.location.address(),
+            
+            // Primitives 
+            PlaceholderType::Guid => Guid::generate(),
+            PlaceholderType::Distribution(DistributionType::Normal) => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
+            PlaceholderType::Float => Entity::placeholder_with_args(&placeholder, |args: FloatArgs| Float::generate(args).to_string()),
+            PlaceholderType::Int  => Entity::placeholder_with_args(&placeholder, |args: IntArgs| Int::generate(args).to_string()),
+            PlaceholderType::Set => Entity::placeholder_with_args(&placeholder, |args: SetArgs| Set::generate(args))
         }
     }
 }

@@ -1,5 +1,7 @@
 pub mod error;
+pub mod types;
 
+use types::{PlaceholderType,PhoneType,NameType,LocationType,DistributionType};
 use error::PlaceholderParseError;
 use regex::{Regex, Captures, Match};
 
@@ -7,43 +9,6 @@ lazy_static! {
     pub static ref PLACEHOLDER_REGEX: Regex = Regex::new("(?P<data_type>(?:[a-zA-Z0-9_]+(?:::)?)+)(?P<args>:[^:]*)?$").unwrap();
 }
 
-#[derive(Clone,Debug)]
-pub enum NameType {
-    First,
-    Last,
-    Full
-}
-
-#[derive(Clone,Debug)]
-pub enum LocationType {
-    Place,
-    Street,
-    Address
-}
-
-#[derive(Clone,Debug)]
-pub enum PhoneType {
-    Mobile,
-    Landline,
-    Any
-}
-
-#[derive(Clone,Debug)]
-pub enum DistributionType {
-    Normal
-}
-
-#[derive(Clone,Debug)]
-pub enum PlaceholderType {
-    Name(NameType),
-    Location(LocationType),
-    Phone(PhoneType),
-    Distribution(DistributionType),
-    Guid,
-    Float,
-    Int,
-    Set
-}
 
 #[derive(Clone,Debug)]
 pub struct Placeholder {
