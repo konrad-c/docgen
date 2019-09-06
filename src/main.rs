@@ -1,14 +1,15 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod placeholder;
+pub mod parser;
+pub mod types;
 mod entity;
 
-use placeholder::types::{PlaceholderType,PhoneType,NameType,LocationType,DistributionType};
-use placeholder::Placeholder;
-use placeholder::error::PlaceholderParseError;
+use parser::Placeholder;
+use parser::error::PlaceholderParseError;
 use entity::collection::EntityCollection;
 use entity::Entity;
+
 use clap::{App, Arg, ArgMatches};
 use regex::{Regex, Captures, Match};
 use std::collections::HashMap;
@@ -91,7 +92,20 @@ lazy_static! {
 }
 
 fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
-    Vec::new()
+    let errors: &mut Vec<PlaceholderParseError> = &mut Vec::new();
+    let x = Regex::new(r"\$\{(?:<(?P<entity_id>[a-zA-Z0-9]+)>)?(?P<placeholder>[^\}]*)\}").unwrap();
+    for captures in x.captures_iter(template) {
+        let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
+        // Validate placeholder can be parsed to a valid type 
+        if let Some(err) = Placeholder::validate(placeholder_str) {
+            errors.push(err);
+            continue;
+        }
+
+        let placeholder: Placeholder = Placeholder::parse(placeholder_str);
+
+    }
+    errors.clone()
 }
 
 fn populate_template(template: &str) -> String {

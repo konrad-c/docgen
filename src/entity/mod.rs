@@ -8,9 +8,8 @@ mod phone;
 mod distribution;
 mod args;
 
-use super::placeholder::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType};
-use super::placeholder::Placeholder;
-use super::placeholder::error::PlaceholderParseError;
+use super::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType};
+use super::parser::Placeholder;
 use name::Name;
 use location::Location;
 use primitive::float::{Float,FloatArgs};
@@ -62,24 +61,26 @@ impl Entity {
 
     fn placeholder_parser(&mut self, placeholder: &Placeholder) -> String {
         match placeholder.data_type {
-            // PlaceholderType::Name(_) => self.name_placeholder(&placeholder),
+            // Name
             PlaceholderType::Name(NameType::First) => self.name.first(),
             PlaceholderType::Name(NameType::Last) => self.name.last(),
             PlaceholderType::Name(NameType::Full) => self.name.full(),
 
-            // PlaceholderType::Phone(_) => self.phone_placeholder(&placeholder),
+            // Phone
             PlaceholderType::Phone(PhoneType::Any) => self.phone.phone(),
             PlaceholderType::Phone(PhoneType::Mobile) => self.phone.mobile(),
             PlaceholderType::Phone(PhoneType::Landline) => self.phone.landline(),
 
-            // PlaceholderType::Location(_) => self.location_placeholder(&placeholder),
+            // Location
             PlaceholderType::Location(LocationType::Place) => self.location.place(),
             PlaceholderType::Location(LocationType::Street) => self.location.street(),
             PlaceholderType::Location(LocationType::Address) => self.location.address(),
+
+            // Distribution
+            PlaceholderType::Distribution(DistributionType::Normal) => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
             
             // Primitives 
             PlaceholderType::Guid => Guid::generate(),
-            PlaceholderType::Distribution(DistributionType::Normal) => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
             PlaceholderType::Float => Entity::placeholder_with_args(&placeholder, |args: FloatArgs| Float::generate(args).to_string()),
             PlaceholderType::Int  => Entity::placeholder_with_args(&placeholder, |args: IntArgs| Int::generate(args).to_string()),
             PlaceholderType::Set => Entity::placeholder_with_args(&placeholder, |args: SetArgs| Set::generate(args))

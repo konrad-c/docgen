@@ -1,6 +1,6 @@
 use super::Placeholder;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PlaceholderParseError {
     pub placeholder: String,
     pub reason: String

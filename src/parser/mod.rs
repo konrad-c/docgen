@@ -1,7 +1,6 @@
 pub mod error;
-pub mod types;
 
-use types::{PlaceholderType,PhoneType,NameType,LocationType,DistributionType};
+use super::types::{PlaceholderType,PhoneType,NameType,LocationType,DistributionType};
 use error::PlaceholderParseError;
 use regex::{Regex, Captures, Match};
 
@@ -19,21 +18,32 @@ pub struct Placeholder {
 
 impl Placeholder {
     pub fn validate<'t>(placeholder: &'t str) -> Option<PlaceholderParseError> {
-        match PLACEHOLDER_REGEX.captures(placeholder) {
-            Some(_) => None,
-            None => Some(PlaceholderParseError::invalid_placeholder(placeholder))
+        let capture_option: Option<Captures> = PLACEHOLDER_REGEX.captures(placeholder);
+        if let None = capture_option {
+            return Some(PlaceholderParseError::invalid_placeholder(placeholder));
         }
+        let captures: Captures = capture_option.unwrap();
+        let data_type = Placeholder::get_data_type(&captures);
+        if let None = Placeholder::parse_type(&data_type) {
+            return Some(PlaceholderParseError::invalid_placeholder(placeholder));
+        }
+
+        None
     }
 
     pub fn parse<'t>(placeholder: &'t str) -> Placeholder {
         PLACEHOLDER_REGEX.captures(placeholder)
             .map(|captures: Captures| {
-                let data_type: String = captures.name("data_type").unwrap().as_str().to_owned();
-                let placeholder_type: PlaceholderType = Placeholder::parse_type(&data_type);
+                let data_type: String = Placeholder::get_data_type(&captures);
+                let placeholder_type: PlaceholderType = Placeholder::parse_type(&data_type).unwrap();
                 let arguments: Option<String> = Placeholder::get_args(&captures);
                 Placeholder { original_type: data_type, data_type: placeholder_type, args: arguments }
             })
             .unwrap()
+    }
+
+    fn get_data_type(placeholder_captures: &Captures) -> String {
+        placeholder_captures.name("data_type").unwrap().as_str().to_owned()
     }
 
     fn get_args(captures: &Captures) -> Option<String> {
@@ -47,23 +57,23 @@ impl Placeholder {
         format!("${{{}:{}}}", self.original_type, self.args.clone().unwrap_or_default())
     }
 
-    fn parse_type(data_type: &String) -> PlaceholderType {
+    fn parse_type(data_type: &String) -> Option<PlaceholderType> {
         match data_type.as_str() {
-            "name::first" => PlaceholderType::Name(NameType::First),
-            "name::last" => PlaceholderType::Name(NameType::Last),
-            "name::full" => PlaceholderType::Name(NameType::Full),
-            "phone" => PlaceholderType::Phone(PhoneType::Any),
-            "phone::mobile" => PlaceholderType::Phone(PhoneType::Mobile),
-            "phone::landline" => PlaceholderType::Phone(PhoneType::Landline),
-            "location::place" => PlaceholderType::Location(LocationType::Place),
-            "location::street" => PlaceholderType::Location(LocationType::Street),
-            "location::address" => PlaceholderType::Location(LocationType::Address),
-            "dist::normal" => PlaceholderType::Distribution(DistributionType::Normal),
-            "guid" => PlaceholderType::Guid,
-            "float" => PlaceholderType::Float,
-            "int" => PlaceholderType::Int,
-            "set" => PlaceholderType::Set,
-            _ => PlaceholderType::Int
+            "name::first" => Some(PlaceholderType::Name(NameType::First)),
+            "name::last" => Some(PlaceholderType::Name(NameType::Last)),
+            "name::full" => Some(PlaceholderType::Name(NameType::Full)),
+            "phone" => Some(PlaceholderType::Phone(PhoneType::Any)),
+            "phone::mobile" => Some(PlaceholderType::Phone(PhoneType::Mobile)),
+            "phone::landline" => Some(PlaceholderType::Phone(PhoneType::Landline)),
+            "location::place" => Some(PlaceholderType::Location(LocationType::Place)),
+            "location::street" => Some(PlaceholderType::Location(LocationType::Street)),
+            "location::address" => Some(PlaceholderType::Location(LocationType::Address)),
+            "dist::normal" => Some(PlaceholderType::Distribution(DistributionType::Normal)),
+            "guid" => Some(PlaceholderType::Guid),
+            "float" => Some(PlaceholderType::Float),
+            "int" => Some(PlaceholderType::Int),
+            "set" => Some(PlaceholderType::Set),
+            _ => None
         }
     }
 }
