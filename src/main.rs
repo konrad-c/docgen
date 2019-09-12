@@ -126,8 +126,6 @@ fn populate_template(template: &str) -> String {
     let entity_collection: &mut EntityCollection = &mut EntityCollection { data: &mut HashMap::new() };
 
     let populated_template = PLACEHOLDER_REGEX.replace_all(template, |captures: &Captures| {
-        let matched_text: String = captures.get(0).unwrap().as_str().to_owned(); 
-
         let entity_ref: Option<&mut Entity> = captures.name("entity_id")
             .map(|id: Match| id.as_str().to_owned())
             .map(|id: String| entity_collection.get(id));
