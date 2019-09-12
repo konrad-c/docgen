@@ -6,20 +6,18 @@ mod name;
 mod util;
 mod phone;
 mod distribution;
-mod args;
 
-use super::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType};
+use super::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType, PlaceholderArgs};
 use super::parser::Placeholder;
 use name::Name;
 use location::Location;
-use primitive::float::{Float,FloatArgs};
+use primitive::float::Float;
 use primitive::guid::Guid;
-use primitive::int::{Int,IntArgs};
-use primitive::set::{Set,SetArgs};
+use primitive::int::Int;
+use primitive::set::Set;
 use phone::Phone;
-use distribution::normal::{Normal, NormalArgs};
+use distribution::normal::Normal;
 
-use args::Args;
 use std::collections::HashMap;
 
 
@@ -53,37 +51,35 @@ impl Entity {
         }
     }
 
-    fn placeholder_with_args<T : Args>(placeholder: &Placeholder, get_func: fn(T) -> String) -> String {
-        let args: String = placeholder.args.clone().unwrap();
-        let parsed_args: Option<T> = T::parse(&args);
-        get_func(parsed_args.unwrap()).to_string()
-    }
-
     fn placeholder_parser(&mut self, placeholder: &Placeholder) -> String {
-        match placeholder.data_type {
+        let dtype: PlaceholderType = placeholder.data_type.clone();
+        let argtype: Option<PlaceholderArgs> = placeholder.data_args.clone();
+
+        match (dtype, argtype) {
             // Name
-            PlaceholderType::Name(NameType::First) => self.name.first(),
-            PlaceholderType::Name(NameType::Last) => self.name.last(),
-            PlaceholderType::Name(NameType::Full) => self.name.full(),
+            (PlaceholderType::Name(NameType::First), _) => self.name.first(),
+            (PlaceholderType::Name(NameType::Last), _) => self.name.last(),
+            (PlaceholderType::Name(NameType::Full), _) => self.name.full(),
 
             // Phone
-            PlaceholderType::Phone(PhoneType::Any) => self.phone.phone(),
-            PlaceholderType::Phone(PhoneType::Mobile) => self.phone.mobile(),
-            PlaceholderType::Phone(PhoneType::Landline) => self.phone.landline(),
+            (PlaceholderType::Phone(PhoneType::Any), _) => self.phone.phone(),
+            (PlaceholderType::Phone(PhoneType::Mobile), _) => self.phone.mobile(),
+            (PlaceholderType::Phone(PhoneType::Landline), _) => self.phone.landline(),
 
             // Location
-            PlaceholderType::Location(LocationType::Place) => self.location.place(),
-            PlaceholderType::Location(LocationType::Street) => self.location.street(),
-            PlaceholderType::Location(LocationType::Address) => self.location.address(),
+            (PlaceholderType::Location(LocationType::Place), _) => self.location.place(),
+            (PlaceholderType::Location(LocationType::Street), _) => self.location.street(),
+            (PlaceholderType::Location(LocationType::Address), _) => self.location.address(),
 
             // Distribution
-            PlaceholderType::Distribution(DistributionType::Normal) => Entity::placeholder_with_args(&placeholder, |args: NormalArgs| Normal::generate(args).to_string()),
+            (PlaceholderType::Distribution(DistributionType::Normal), Some(PlaceholderArgs::Normal { mean, stddev })) => Normal::generate(mean, stddev).to_string(),
             
             // Primitives 
-            PlaceholderType::Guid => Guid::generate(),
-            PlaceholderType::Float => Entity::placeholder_with_args(&placeholder, |args: FloatArgs| Float::generate(args).to_string()),
-            PlaceholderType::Int  => Entity::placeholder_with_args(&placeholder, |args: IntArgs| Int::generate(args).to_string()),
-            PlaceholderType::Set => Entity::placeholder_with_args(&placeholder, |args: SetArgs| Set::generate(args))
+            (PlaceholderType::Guid, _) => Guid::generate(),
+            (PlaceholderType::Float, Some(PlaceholderArgs::Float { min, max })) => Float::generate(min, max).to_string(),
+            (PlaceholderType::Int, Some(PlaceholderArgs::Int { min, max }))  => Int::generate(min, max).to_string(),
+            (PlaceholderType::Set, Some(PlaceholderArgs::Set { options })) => Set::generate(options),
+            _ => String::new()
         }
     }
 }

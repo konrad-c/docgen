@@ -35,3 +35,13 @@ pub enum PlaceholderType {
     Int,
     Set
 }
+
+// ------------------------------------------
+
+#[derive(Clone,Debug)]
+pub enum PlaceholderArgs {
+    Float { min: f64, max: f64 },
+    Int { min: i64, max: i64 },
+    Set { options: Vec<String> },
+    Normal { mean: f64, stddev: f64 }
+}

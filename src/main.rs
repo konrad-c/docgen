@@ -5,6 +5,7 @@ pub mod parser;
 pub mod types;
 mod entity;
 
+use types::PlaceholderArgs;
 use parser::Placeholder;
 use parser::error::PlaceholderParseError;
 use entity::collection::EntityCollection;
@@ -74,6 +75,14 @@ Supported data types:
             matches.value_of("template").map(|t: &str| t.to_owned())
         })
         .expect("No template supplied");
+    
+    let errors: Vec<PlaceholderParseError> = validate_template(&template);
+    if errors.len() > 0 {
+        for parse_error in errors {
+            println!("Validation error for placeholder '{}'. Reason: {}", parse_error.placeholder, parse_error.reason);
+        }
+        return Ok(());
+    }
 
     let repetitions: u64 = matches.value_of("number")
         .unwrap_or("1")
@@ -84,6 +93,7 @@ Supported data types:
         let generated_doc: String = populate_template(&template);
         println!("{}", &generated_doc);
     }
+
     Ok(())
 }
 
@@ -103,7 +113,8 @@ fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
         }
 
         let placeholder: Placeholder = Placeholder::parse(placeholder_str);
-
+        // Validate placeholder arguments:
+        
     }
     errors.clone()
 }
