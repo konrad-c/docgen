@@ -16,7 +16,7 @@ use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches: ArgMatches = App::new("Templated data generator tool")
-        .version("0.2.0")
+        .version("0.3.0")
         .author("Konrad <ko.cybulski@gmail.com>")
         .about("A tool for generating randomised documents in any form provided a template.
 Provide a template string or file containing typed placeholders for which this tool will generate data, and create a document according to the tempalte with those placeholders replaced with randomised data.
