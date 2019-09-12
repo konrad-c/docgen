@@ -1,5 +1,3 @@
-use super::Placeholder;
-
 #[derive(Debug, Clone)]
 pub struct PlaceholderParseError {
     pub placeholder: String,
@@ -14,12 +12,10 @@ impl PlaceholderParseError {
         }
     }
 
-    pub fn invalid_arg(placeholder: &Placeholder, help_string: &str) -> PlaceholderParseError {
-        let placeholder_string: String = placeholder.to_string();
-        let arg_string: String = placeholder.args.clone().unwrap_or_default();
+    pub fn invalid_arg(placeholder_string: &String, arg_string: &String) -> PlaceholderParseError {
         PlaceholderParseError { 
-            placeholder: String::from(&placeholder_string),
-            reason: format!("Invalid argument for placeholder '{}'. Argument(s) provided '{}' were invalid. {}", &placeholder_string, &arg_string, help_string)
+            placeholder: *placeholder_string,
+            reason: format!("Invalid argument for placeholder '{}'. Argument(s) provided '{}' were invalid.", &placeholder_string, &arg_string)
         }
     }
 }

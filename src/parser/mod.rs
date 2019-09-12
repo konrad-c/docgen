@@ -16,10 +16,10 @@ pub trait Args {
 
 #[derive(Clone,Debug)]
 pub struct Placeholder {
-    pub original_type: String,
     pub data_type: PlaceholderType,
     pub data_args: Option<PlaceholderArgs>,
-    pub args: Option<String>
+    original_type: String,
+    args: Option<String>
 }
 
 impl Placeholder {
@@ -29,9 +29,20 @@ impl Placeholder {
             return Some(PlaceholderParseError::invalid_placeholder(placeholder));
         }
         let captures: Captures = capture_option.unwrap();
-        let data_type = Placeholder::get_data_type(&captures);
-        if let None = Placeholder::parse_type(&data_type) {
+        // Get parsed PlaceholderType
+        let data_type_string: String = Placeholder::get_data_type(&captures);
+        let parsed_type: Option<PlaceholderType> = Placeholder::parse_type(&data_type_string);
+        if let None = parsed_type {
             return Some(PlaceholderParseError::invalid_placeholder(placeholder));
+        }
+
+        // Get parsed PlaceholderArgs
+        let data_type = parsed_type.unwrap();
+        let args_capture: Option<String> = Placeholder::get_args(&captures);
+        if let Some(args_string) = args_capture {
+            if Placeholder::parse_args(&data_type, &args_string).is_none() {
+                return Some(PlaceholderParseError::invalid_arg(&placeholder.to_owned(), &args_string));
+            }
         }
 
         None
@@ -96,6 +107,7 @@ impl Placeholder {
         }
     }
 }
+
 struct ArgsParser;
 impl ArgsParser {
     pub fn parse_float(args: &String) -> Option<PlaceholderArgs> {

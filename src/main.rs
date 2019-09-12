@@ -5,7 +5,6 @@ pub mod parser;
 pub mod types;
 mod entity;
 
-use types::PlaceholderArgs;
 use parser::Placeholder;
 use parser::error::PlaceholderParseError;
 use entity::collection::EntityCollection;
@@ -113,8 +112,8 @@ fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
         }
 
         let placeholder: Placeholder = Placeholder::parse(placeholder_str);
-        // Validate placeholder arguments:
-        
+        // Validate placeholder arguments match placeholder type:
+        let Entity::validate(placeholder: &Placeholder)
     }
     errors.clone()
 }
