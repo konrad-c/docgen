@@ -113,7 +113,11 @@ fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
 
         let placeholder: Placeholder = Placeholder::parse(placeholder_str);
         // Validate placeholder arguments match placeholder type:
-        let Entity::validate(placeholder: &Placeholder)
+        let data_option: Option<String> = Entity::validate(&placeholder);
+        if let None = data_option {
+            errors.push(PlaceholderParseError { placeholder: placeholder.to_string(), reason: "Invalid arguments for placeholder type".to_owned()});
+            continue;
+        }
     }
     errors.clone()
 }
