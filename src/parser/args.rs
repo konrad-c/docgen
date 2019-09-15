@@ -5,7 +5,6 @@ impl PlaceholderArgsParser {
 
     pub fn parse_args(placeholder_type: &PlaceholderType, args: &String) -> Option<PlaceholderArgs> {
         match placeholder_type {
-            // PlaceholderType::Guid => Guid::generate(),
             PlaceholderType::Float => PlaceholderArgsParser::parse_float(&args),
             PlaceholderType::Set => PlaceholderArgsParser::parse_set(&args),
             PlaceholderType::Int => PlaceholderArgsParser::parse_int(&args),
@@ -73,5 +72,61 @@ impl PlaceholderArgsParser {
             }
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_int_args() {
+        let args = "1,2".to_owned();
+        let parsed_args: PlaceholderArgs = PlaceholderArgsParser::parse_int(&args).unwrap();
+        match parsed_args {
+            PlaceholderArgs::Int { min, max } => {
+                assert_eq!(min, 1);
+                assert_eq!(max, 2);
+            },
+            arg_type => panic!("Integer args were not parsed to PlaceholderArgs::Int. Actual: {:?}", arg_type)
+        }
+    }
+
+    #[test]
+    fn parse_float_args() {
+        let args = "1,2".to_owned();
+        let parsed_args: PlaceholderArgs = PlaceholderArgsParser::parse_float(&args).unwrap();
+        match parsed_args {
+            PlaceholderArgs::Float { min, max } => {
+                assert_eq!(min, 1f64);
+                assert_eq!(max, 2f64);
+            },
+            arg_type => panic!("Float args were not parsed to PlaceholderArgs::Float. Actual: {:?}", arg_type)
+        }
+    }
+
+    #[test]
+    fn parse_set_args() {
+        let args = "1,2,3,4".to_owned();
+        let parsed_args: PlaceholderArgs = PlaceholderArgsParser::parse_set(&args).unwrap();
+        match parsed_args {
+            PlaceholderArgs::Set { options } => {
+                assert_eq!(options, vec!["1", "2", "3", "4"]);
+            },
+            arg_type => panic!("Set args were not parsed to PlaceholderArgs::Set. Actual: {:?}", arg_type)
+        }
+    }
+
+    #[test]
+    fn parse_normal_args() {
+        let args = "1,2".to_owned();
+        let parsed_args: PlaceholderArgs = PlaceholderArgsParser::parse_normal(&args).unwrap();
+        match parsed_args {
+            PlaceholderArgs::Normal { mean, stddev } => {
+                assert_eq!(mean, 1f64);
+                assert_eq!(stddev, 2f64);
+            },
+            arg_type => panic!("Normal args were not parsed to PlaceholderArgs::Normal. Actual: {:?}", arg_type)
+        }
     }
 }
