@@ -1,11 +1,8 @@
-mod place;
-mod street;
-mod street_type;
-
-use place::PLACE;
-use street::STREET;
-use street_type::STREET_TYPE;
 use super::util;
+use super::data;
+use data::place::PLACE;
+use data::street::STREET;
+use data::street_type::STREET_TYPE;
 
 use lazycell::LazyCell;
 

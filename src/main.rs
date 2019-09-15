@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod parser;
-pub mod types;
+mod parser;
+mod types;
+mod generator;
 mod entity;
 
 use parser::Placeholder;

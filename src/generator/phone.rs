@@ -1,6 +1,4 @@
-mod country_code;
-
-use country_code::COUNTRY_CODE;
+use super::data::country_code::COUNTRY_CODE;
 use super::util;
 use lazycell::LazyCell;
 

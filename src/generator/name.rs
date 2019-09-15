@@ -1,11 +1,8 @@
-mod first_name;
-mod last_name;
-mod middle_name;
-
-use first_name::FIRST_NAME;
-use last_name::LAST_NAME;
-use middle_name::MIDDLE_NAME;
 use super::util;
+use super::data;
+use data::first_name::FIRST_NAME;
+use data::last_name::LAST_NAME;
+use data::middle_name::MIDDLE_NAME;
 
 use lazycell::LazyCell;
 

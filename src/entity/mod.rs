@@ -1,25 +1,14 @@
 pub mod collection;
 
-mod location;
-mod primitive;
-mod name;
-mod util;
-mod phone;
-mod distribution;
-
-use super::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType, PlaceholderArgs};
-use super::parser::Placeholder;
-use name::Name;
-use location::Location;
-use primitive::float::Float;
-use primitive::guid::Guid;
-use primitive::int::Int;
-use primitive::set::Set;
-use phone::Phone;
-use distribution::normal::Normal;
+use crate::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType, PlaceholderArgs};
+use crate::parser::Placeholder;
+use crate::generator::name::Name;
+use crate::generator::location::Location;
+use crate::generator::primitive::{Float,Guid,Int,Set};
+use crate::generator::phone::Phone;
+use crate::generator::distribution::Normal;
 
 use std::collections::HashMap;
-
 
 #[derive(Debug, Clone)]
 pub struct Entity {
