@@ -42,6 +42,7 @@ pub enum PlaceholderType {
 pub enum PlaceholderArgs {
     Float { min: f64, max: f64 },
     Int { min: i64, max: i64 },
+    IntRepeated { min: i64, max: i64, repeat: u64 },
     Set { options: Vec<String> },
     Normal { mean: f64, stddev: f64 }
 }

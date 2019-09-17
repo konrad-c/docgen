@@ -1,12 +1,12 @@
 {
     "_id": "${guid}",
-    "_match": ${dist::normal:0.5,0.15},
+    "_match": ${dist::normal:mean=0.5;stddev=0.15},
     "name": "${<1>name::full}",
     "pref_name": "${<1>name::first}",
-    "age": ${int:21,70},
+    "age": ${int:min=21;max=70},
     "bank_details": {
-        "bsb": "${int:0,10}${int:0,10}${int:0,10} ${int:0,10}${int:0,10}${int:0,10}",
-        "account_number": "${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}${int:0,10}",
+        "bsb": "${int:min=0;max=10;rep=3} ${int:min=0;max=10;rep=3}",
+        "account_number": "${int:min=0;max=10;rep=8}",
         "account_holder_name": "${<1>name::full}"
     },
     "contact": {

@@ -48,31 +48,73 @@ impl Entity {
         let dtype: PlaceholderType = placeholder.data_type.clone();
         let argtype: Option<PlaceholderArgs> = placeholder.data_args.clone();
 
-        match (dtype, argtype) {
-            // Name
-            (PlaceholderType::Name(NameType::First), _) => Some(self.name.first()),
-            (PlaceholderType::Name(NameType::Last), _) => Some(self.name.last()),
-            (PlaceholderType::Name(NameType::Full), _) => Some(self.name.full()),
+        match dtype {
+            PlaceholderType::Name(name_type) => self.generate_name(&name_type),
+            PlaceholderType::Location(location_type) => self.generate_location(&location_type),
+            PlaceholderType::Phone(phone_type) => self.generate_phone(&phone_type),
+            PlaceholderType::Distribution(distribution_type) => self.generate_distribution(&distribution_type, argtype),
+            PlaceholderType::Float => self.generate_float(argtype),
+            PlaceholderType::Int => self.generate_int(argtype),
+            PlaceholderType::Set => self.generate_set(argtype),
+            PlaceholderType::Guid => Some(Guid::generate()),
+        }
+    }
 
-            // Phone
-            (PlaceholderType::Phone(PhoneType::Any), _) => Some(self.phone.phone()),
-            (PlaceholderType::Phone(PhoneType::Mobile), _) => Some(self.phone.mobile()),
-            (PlaceholderType::Phone(PhoneType::Landline), _) => Some(self.phone.landline()),
+    fn generate_name(&mut self, dtype: &NameType) -> Option<String> {
+        match dtype {
+            NameType::First => Some(self.name.first()),
+            NameType::Last => Some(self.name.last()),
+            NameType::Full => Some(self.name.full())
+        }
+    }
 
-            // Location
-            (PlaceholderType::Location(LocationType::Place), _) => Some(self.location.place()),
-            (PlaceholderType::Location(LocationType::Street), _) => Some(self.location.street()),
-            (PlaceholderType::Location(LocationType::Address), _) => Some(self.location.address()),
+    fn generate_location(&mut self, dtype: &LocationType) -> Option<String> {
+        match dtype {
+            LocationType::Place => Some(self.location.place()),
+            LocationType::Street => Some(self.location.street()),
+            LocationType::Address => Some(self.location.address())
+        }
+    }
 
-            // Distribution
-            (PlaceholderType::Distribution(DistributionType::Normal), Some(PlaceholderArgs::Normal { mean, stddev })) => Some(Normal::generate(mean, stddev).to_string()),
-            
-            // Primitives 
-            (PlaceholderType::Guid, _) => Some(Guid::generate()),
-            (PlaceholderType::Float, Some(PlaceholderArgs::Float { min, max })) => Some(Float::generate(min, max).to_string()),
-            (PlaceholderType::Int, Some(PlaceholderArgs::Int { min, max }))  => Some(Int::generate(min, max).to_string()),
-            (PlaceholderType::Set, Some(PlaceholderArgs::Set { options })) => Some(Set::generate(options)),
+    fn generate_phone(&mut self, dtype: &PhoneType) -> Option<String> {
+        match dtype {
+            PhoneType::Any => Some(self.phone.phone()),
+            PhoneType::Mobile => Some(self.phone.mobile()),
+            PhoneType::Landline => Some(self.phone.landline())
+        }
+    }
+
+    fn generate_distribution(&mut self, dtype: &DistributionType, argtype: Option<PlaceholderArgs>) -> Option<String> {
+        argtype.and_then(|args: PlaceholderArgs| match (dtype, args) {
+            (DistributionType::Normal, PlaceholderArgs::Normal { mean, stddev }) => Some(Normal::generate(mean, stddev).to_string()),
+            _ => None
+        })
+    }
+
+    fn generate_int(&mut self, args: Option<PlaceholderArgs>) -> Option<String> {
+        match args {
+            Some(PlaceholderArgs::Int { min, max })  => Some(Int::generate(min, max).to_string()),
+            Some(PlaceholderArgs::IntRepeated { min, max, repeat })  => {
+                let generated: Vec<String> = (0..repeat)
+                    .map(|_: u64| Int::generate(min, max).to_string())
+                    .collect();
+                Some(generated.join(""))
+            },
             _ => None
         }
+    }
+
+    fn generate_float(&mut self, argtype: Option<PlaceholderArgs>) -> Option<String> {
+        argtype.and_then(|args: PlaceholderArgs| match args {
+            PlaceholderArgs::Float { min, max } => Some(Float::generate(min, max).to_string()),
+            _ => None
+        })
+    }
+
+    fn generate_set(&mut self, argtype: Option<PlaceholderArgs>) -> Option<String> {
+        argtype.and_then(|args: PlaceholderArgs| match args {
+            PlaceholderArgs::Set { options } => Some(Set::generate(options)),
+            _ => None
+        })
     }
 }
