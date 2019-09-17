@@ -24,7 +24,6 @@ impl PlaceholderArgsParser {
         let mut keyed_args = HashMap::new();
         let matches: CaptureMatches = ARGS_REGEX.captures_iter(args.as_str());
         for captures in matches {
-            println!("{:?}", captures);
             let name = captures.name("name").unwrap().as_str().to_owned();
             let value = captures.name("value").unwrap().as_str().to_owned();
             keyed_args.insert(name, value);
