@@ -7,7 +7,7 @@ impl PlaceholderArgsParser {
         match placeholder_type {
             PlaceholderType::Float => PlaceholderArgsParser::parse_float(&args),
             PlaceholderType::Set => PlaceholderArgsParser::parse_set(&args),
-            PlaceholderType::Int => PlaceholderArgsParser::parse_int(&args),
+            PlaceholderType::Int => IntArgs::parse(&args),
             PlaceholderType::Distribution(DistributionType::Normal) => PlaceholderArgsParser::parse_normal(&args),
             _ => None
         }
@@ -42,20 +42,6 @@ impl PlaceholderArgsParser {
         }
     }
 
-    fn parse_int(args: &String) -> Option<PlaceholderArgs> {
-        let arg_vec: Vec<&str> = args.split(",")
-            .into_iter()
-            .collect();
-        if let [min, max] = arg_vec[..] {
-            let min_val: Result<i64, _> = min.parse::<i64>();
-            let max_val: Result<i64, _> = max.parse::<i64>();
-            if min_val.is_ok() && max_val.is_ok() {
-                return Some(PlaceholderArgs::Int { min: min_val.unwrap(), max: max_val.unwrap() });
-            }
-        }
-        None
-    }
-
     fn parse_normal(args: &String) -> Option<PlaceholderArgs> {
         let arg_vec: Vec<&str> = args.split(",")
             .into_iter()
@@ -75,6 +61,29 @@ impl PlaceholderArgsParser {
     }
 }
 
+struct IntArgs;
+impl IntArgs {
+    pub fn parse(args: &String) -> Option<PlaceholderArgs> {
+        let arg_vec: Vec<&str> = args.split(",")
+            .into_iter()
+            .collect();
+        match arg_vec[..] {
+            [min, max] => IntArgs::parse_min_max(min, max),
+            _ => None
+        }
+    }
+
+    fn parse_min_max(min: &str, max: &str) -> Option<PlaceholderArgs> {
+        let min_val: Result<i64, _> = min.parse::<i64>();
+        let max_val: Result<i64, _> = max.parse::<i64>();
+        if min_val.is_ok() && max_val.is_ok() {
+            Some(PlaceholderArgs::Int { min: min_val.unwrap(), max: max_val.unwrap() })
+        } else {
+            None
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,7 +91,7 @@ mod tests {
     #[test]
     fn parse_int_args() {
         let args = "1,2".to_owned();
-        let parsed_args: PlaceholderArgs = PlaceholderArgsParser::parse_int(&args).unwrap();
+        let parsed_args: PlaceholderArgs = IntArgs::parse(&args).unwrap();
         match parsed_args {
             PlaceholderArgs::Int { min, max } => {
                 assert_eq!(min, 1);
