@@ -39,26 +39,18 @@ e.g. ./docgen -f example_template.tpl -n 8000
 ```
 
 ## Supported placeholders
-The placeholder types supported currently include:
-Referencing types and their subtypes is done with the syntax: 'type::subtype:arg1,arg2' e.g. 'name::first'
 
-### Complex types:
-- name
-    - first
-    - last
-    - full
-- location
-    - address
-    - place
-    - street
-- phone
-    - mobile
-    - landline
-- dist (random distributions)
-    - normal:MEAN,STANDARD_DEVIATION (normally distributed random variable with mean and standard deviation)
-
-Primitive types:
-- int:MIN,MAX (integer between MIN and MAX values)
-- float:MIN,MAX (float value between MIN and MAX values)
-- set:A,B,C,D (randomly selected element of the provided set e.g. B)
-- guid
+- first => `${name::first}`
+- last => `${name::last}`
+- full => `${name::full}`
+- address => `${location::address}`
+- place => `${location::place}`
+- street => `${location::street}`
+- mobile phone => `${phone::mobile}`
+- landline phone => `${phone::landline}`
+- normal distribution => `${dist::normal:mean=0;stddev=1}`
+- integer => `${int:min=0;max=5}`
+- repeated integer => `${int:min=0;max=10;rep=4}`
+- float => `${float:min=0;max=1}`
+- set => `${set:options=[A,B,C,D]}` (randomly selected element of the provided set e.g. B)
+- guid => `${guid}`

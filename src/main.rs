@@ -22,33 +22,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .about("A tool for generating randomised documents in any form provided a template.
 Provide a template string or file containing typed placeholders for which this tool will generate data, and create a document according to the tempalte with those placeholders replaced with randomised data.
 
-Example templates:
-    'Hi, my name is ${first_name} ${last_name}'
-    'Hi, my name is ${full_name}'
-    '{\"id\": \"${guid}\", \"phone\": \"${phone}\"}'
+Usage: 
+    Inline template: './docgen --template \"Hi my name is ${name::first}\"'
+    Template file:   './docgen --f path/to/file -n 100'
 
 Supported data types:
-    Referencing types and their subtypes is done with the syntax: 'type::subtype:arg1,arg2' e.g. 'name::first'
-    Complex types:
-    - name
-        - first
-        - last
-        - full
-    - location
-        - address
-        - place
-        - street
-    - phone
-        - mobile
-        - landline
-    - dist (random distributions)
-        - normal:MEAN,STANDARD_DEVIATION (normally distributed random variable with mean and standard deviation)
-
-    Primitive types:
-    - int:MIN,MAX (integer between MIN and MAX values)
-    - float:MIN,MAX (float value between MIN and MAX values)
-    - set:A,B,C,D (randomly selected element of the provided set e.g. B)
-    - guid
+    - first => ${name::first}
+    - last => ${name::last}
+    - full => ${name::full}
+    - address => ${location::address}
+    - place => ${location::place}
+    - street => ${location::street}
+    - mobile phone => ${phone::mobile}
+    - landline phone => ${phone::landline}
+    - normal distribution => ${dist::normal:mean=0;stddev=1}
+    - integer => ${int:min=0;max=5}
+    - repeated integer => ${int:min=0;max=10;rep=4}
+    - float => ${float:min=0;max=1}
+    - set => ${set:options=[A,B,C,D]} (randomly selected element of the provided set e.g. B)
+    - guid => ${guid}
         ")
         .arg(Arg::with_name("template")
             .help("The template string to populate with generated data")
