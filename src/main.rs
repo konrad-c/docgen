@@ -8,7 +8,6 @@ mod entity;
 
 use parser::Placeholder;
 use parser::error::PlaceholderParseError;
-use entity::collection::EntityCollection;
 use entity::Entity;
 
 use clap::{App, Arg, ArgMatches};
@@ -116,12 +115,12 @@ fn validate_template(template: &str) -> Vec<PlaceholderParseError> {
 }
 
 fn populate_template(template: &str) -> String {
-    let entity_collection: &mut EntityCollection = &mut EntityCollection { data: &mut HashMap::new() };
+    let entity_collection = &mut HashMap::new();
 
     let populated_template = PLACEHOLDER_REGEX.replace_all(template, |captures: &Captures| {
         let entity_ref: Option<&mut Entity> = captures.name("entity_id")
             .map(|id: Match| id.as_str().to_owned())
-            .map(|id: String| entity_collection.get(id));
+            .map(|id: String| entity_collection.entry(id).or_insert(Entity::new()));
 
         let placeholder_str: &str = captures.name("placeholder").unwrap().as_str();
         let placeholder: Placeholder = Placeholder::parse(placeholder_str);

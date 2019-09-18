@@ -1,5 +1,3 @@
-pub mod collection;
-
 use crate::types::{PlaceholderType, NameType, LocationType, PhoneType, DistributionType, PlaceholderArgs};
 use crate::parser::Placeholder;
 use crate::generator::name::Name;
