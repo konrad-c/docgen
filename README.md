@@ -1,4 +1,4 @@
-# Document Generator (name to be refined)
+# Document Generator
 
 The document generator, name TBD, aims to solve the problem of generating large numbers of documents according to a supplied template.
 Often when creating and testing programs, the desire exists to create database of fake data, or generate a large number of sample queries, documents, commands, or generic text that conforms to a certain structure (JSON, XML, plaintext).
